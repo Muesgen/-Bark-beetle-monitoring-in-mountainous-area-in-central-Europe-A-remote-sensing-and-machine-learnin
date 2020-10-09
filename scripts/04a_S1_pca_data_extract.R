@@ -1,14 +1,13 @@
-########## Sentinel 2 data extraction from observation file##########
+########## Sentinel 1 pca data extraction from observation file##########
 #---
-# title: "Sentinel 2  extract data"
+# title: "Sentinel 1  extract data"
 # Author: Marvin Müsgen
-# Description: In this Skripts the data from the pca rasters were extracted from point coordinates of observations
+# Description: In this Skripts the data from the Sentinel 1 pca rasters were extracted from point coordinates of observations
 #---
-
 #Setting Paths
 observations <- "o_total.csv" # name of observation data
 setwd("/Volumes/MarvinLaCie/Marvin/BB_rf") # setting working directory
-Input_dir <- "/output/Sen2/pca" # inpiut directory
+Input_dir <- "/output/Sen1/pca" # inpiut directory
 funfold= paste0(getwd(),"/functions") # function folder directory
 ext <- "/observations/NP_Boundary.shp" # File in Input_dir: Polygon Shapefile with the extent of the area of Interest
 area_path <- paste0(getwd(),"/input/observations/NP_Boundary.shp") #Path to study area shape
@@ -20,6 +19,8 @@ end <- as.Date("2018-09-30") #End date of the time of interes
 xcoordcolnum <- 3 # column number of the x coordinate of your obseravtion date
 ycoordcolnum <- 4 # column number of the y coordinate of your observation data
 projObs <- "+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs"  # Projection of the x and y column of observation file
+used_pols <- c("VH", "VV", "ratio")
+used_orbit <- "asc"
 
 #Loading functions 
 source(paste0(funfold,"/check_library.R"))
@@ -28,20 +29,26 @@ source(paste0(funfold,"/statistic_function.R"))
 #loading Librarys
 check_library(pckgs)
 
-#Listing Dates
-files_dates<- as.character(substr(list.files(paste0(getwd(),"/output/Sen2/Indices/"),full.names = FALSE, pattern = ".tif$"), 12, 19)) # listing dates of images
-month <- as.character(substr(list.files(paste0(getwd(), "/output/Sen2/Indices/"),full.names = FALSE, pattern = ".tif$"), 12, 17)) # listing month
-month <- unique(month)
+#Listing the Dates of Images
+files_dates<- as.character(as.Date(substr(list.files(paste0(getwd(),"/input/sentinel_1_preproc/Ascending/"),full.names = FALSE, pattern = ".tif$"), 18, 26), format="%Y%m%d"))
 print("File dates are listed")
-#print(files_dates)
+print(files_dates)
+
+#Listing the month for filtering later the files dates
+forced_start <- as.Date(paste0(format(start, "%Y-%m"), "-01"))
+forced_end <- as.Date(paste0(format(end, "%Y-%m"), "-01"))
+seq_dates <- seq.Date(forced_start, forced_end, by = "month")
+month<- strftime(seq_dates,"%Y-%m")
+print("Month are listed")
+print(month)
 
 #speeding up the raster package
 rasterOptions(maxmemory = 1e+09)
 
 #reading the rasters
-temp <- list.files(paste0(getwd(), Input_dir,"/"), pattern = "*.tif", full.names = TRUE)
-rs_list<- lapply(temp, stack)
-#rs_list<- stack(temp)
+temp <- list.files(paste0(getwd(),"/output/Sen1/Ascending/pca/"), pattern = "*.tif", full.names = TRUE)
+#rs_list<- lapply(temp, stack)
+rs_list<- stack(temp)
 
 #read in the observations
 obs <-read.csv(paste0(getwd(),"/input/observations/", observations))
@@ -74,37 +81,33 @@ if (is.null(projObs) == TRUE){
 r_crs<- rs_list[[1]]@crs
 spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
 
-#creating correct rasternames
-singleString <- paste(readLines(paste0(getwd(),"/output/Sen2/used_indices.txt")), collapse=" ")
-veg_names <- unlist(strsplit(singleString, " "))
-
 #initialize progressbar
-pb = txtProgressBar(min = 0, max = length(veg_names), initial = 0, style = 3)
+pb = txtProgressBar(min = 0, max = length(used_pols), initial = 0, style = 3)
 
 #extracting rasterdata
-for (i in 1:length(veg_names)){
+for (i in 1:length(used_pols)){
   
   #set Progress
   setTxtProgressBar(pb,i)
   print(Sys.time())
   
   #reading raster Files 
-  ras_files <- list.files(paste0(getwd(), Input_dir,"/"),full.names = FALSE, pattern = ".tif$") # list raster
-  rs_temp <- ras_files[which(grepl(veg_names[i], ras_files) == TRUE)] #filter Index
+  ras_files <- list.files(paste0(getwd(),"/output/Sen1/Ascending/pca/"), pattern = "*.tif", full.names = TRUE) # list raster
+  rs_temp <- ras_files[which(grepl(used_pols[i], ras_files) == TRUE)] #filter Index
   
   # checking if Index include more than 1 Index, teh correct Index is filtered by this if command
-  if(length(which(grepl(veg_names[i],veg_names))) > 1){
-    var <- veg_names[which(veg_names[i] == veg_names)] # getting the correct Index
-    test <- veg_names[which(grepl(veg_names[i],veg_names))] # getting all seleced Index
+  if(length(which(grepl(used_pols[i], used_pols))) > 1){
+    var <- used_pols[which(used_pols[i] == used_pols)] # getting the correct Index
+    test <- used_pols[which(grepl(used_pols[i],used_pols))] # getting all seleced Index
     fake <- test[which(test != var)] #get wrong Index
     rs_temp <- rs_temp[which(grepl(fake, rs_temp) == FALSE)] # remove wrong index from rasterlist
   }
   
   # Stack raster into correct extraction format
-  rs <- stack(paste0(getwd(), Input_dir,"/", rs_temp)) # stack
+  rs <- stack(rs_temp) # stack
   
   #save colnames for extracted data
-  names <-names(rs)
+  names <- names(rs)
   
   #extracting raster values
   print(paste0("Starting extracting raster data for observation points: ", Sys.time()))
@@ -115,5 +118,5 @@ for (i in 1:length(veg_names)){
   obs <- cbind(obs,df)
 }
 
-#writing out pca stats
-write.csv(obs,file = paste0(getwd(),"/output/Sen2/pca/PCA_Extracted_data",start,end,".csv"))
+#write out extracted data
+write.csv(obs,file = paste0(getwd(),"/output/Sen1/Ascending/pca/PCA_Extracted_data_",used_orbit,"_",start,end,".csv"))

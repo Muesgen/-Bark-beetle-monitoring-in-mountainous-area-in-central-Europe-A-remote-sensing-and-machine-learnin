@@ -19,23 +19,25 @@
 #Meyer, H., Pebesma, E. (2020): Predicting into unknown space? Estimating the area of applicability of spatial prediction models. http://arxiv.org/abs/2005.07939
 #Tutorial (https://youtu.be/EyP04zLe9qo) and Lecture(https://youtu.be/OoNH6Nl-X2s) recording from OpenGeoHub summer school 2020 on the area of applicability.
 
-###Setting Parameters###
-setwd("/Volumes/MarvinLaCie/Marvin/BB_rf")
-input_dir <- "/output/"
+#Set Paths
+setwd("/Volumes/MarvinLaCie/Marvin/BB_rf") # working directory
+input_dir <- "/output/" # input data dir
 funfold= paste0(getwd(),"/functions") # function folder directory
-used_indices <- "used_indices.txt"
-used_pol <- c("VH","VV","ratio")
-startdate <- "2018-04-01"
-enddate <- "2018-09-30"
-observations <- "o_total.csv"
-observation <- "observatio"
+used_indices <- "used_indices.txt" # used Sen2 vegetation Indices
+used_pol <- c("VH","VV","ratio") # used Sentinel 1 polarizations
+used_orbit <- c("Ascending", "Descending")
 
-# needed packages:
-pckgs <- c("stringr","CAST", "caret", "doParallel","randomForest","sp","rgeos")
-
+#Set Variables
+startdate <- "2018-04-01" # start date of interes
+enddate <- "2018-09-30" # end date of interest
+observations <- "o_total.csv" # observation file
+observation <- "observatio" #observation column
+pckgs <- c("stringr","CAST", "caret", "doParallel","randomForest","sp","rgeos") # needed Packages
 #loading libararys and functions
 source(paste0(funfold,"/autostopcluster.R"))
 source(paste0(funfold,"/check_library.R"))
+
+#loading librarys
 check_library(pckgs)
 
 ###loading vegetation indices for checking
@@ -43,33 +45,36 @@ singleString <- paste(readLines(paste0(getwd(),input_dir,"Sen2/",used_indices)),
 veg_names <- unlist(strsplit(singleString, " "))
 
 #listing Sentinel 2 Data
-files_2<- list.files(paste0(getwd(),input_dir,"Sen2/"), pattern = "observation_stats_without_cloudvalues2018-04-012018-09-30")
+files_2<- list.files(paste0(getwd(),input_dir,"Sen2/pca/"), pattern = "PCA_Extracted")
 
 ### reading Sentinel 2 Data ###
-#this elaborate process prevents errors in the training data
-for (i in 1:length(files_2)){
-  if (i == 1){
-    df <- read.csv(paste0(getwd(),input_dir,"Sen2/",files_2[i]))
+#this elaborate process prevents errors in the training data, if the data is stored in two or more csv
+if(length(files_2) == 1){
+  df <- read.csv(paste0(getwd(),input_dir,"Sen2/pca/",files_2))
+}else{
+  for (i in 1:length(files_2)){
+    if (i == 1){
+      df <- read.csv(paste0(getwd(),input_dir,"Sen2/pca/",files_2[i]))
   }
   else if(i == length(files_2)){
-    temp <- read.csv(paste0(getwd(),input_dir,"Sen2/",files_2[i]))
-    df <- cbind(df,temp)
-    for (j in 1:length(veg_names)){
-      if(j == 1){
-        data2 <- df[,grepl(veg_names[j], colnames(df))]
-      }
-      else{
-        veg_temp <- df[,grepl(veg_names[j], colnames(df))]
-        data2 <- cbind(data2, veg_temp)
+      temp <- read.csv(paste0(getwd(),input_dir,"Sen2/pca/",files_2[i]))
+      df <- cbind(df,temp)
+      for (j in 1:length(veg_names)){
+        if(j == 1){
+          data2 <- df[,grepl(veg_names[j], colnames(df))]
+        }
+        else{
+          veg_temp <- df[,grepl(veg_names[j], colnames(df))]
+          data2 <- cbind(data2, veg_temp)
+        }
       }
     }
-  }
-  else{
-    temp <- read.csv(paste0(getwd(),input_dir,"Sen2/",files_2[i]))
-    df <- cbind(df,temp)
+    else{
+      temp <- read.csv(paste0(getwd(),input_dir,"Sen2/",files_2[i]))
+      df <- cbind(df,temp)
+    }
   }
 }
-
 #listing Sentinel 1 files
 
 files_1a <- list.files(paste0(getwd(),input_dir,"Sen1/Ascending/"), pattern = paste0("observation_stats",startdate,enddate))
@@ -138,7 +143,7 @@ pred <- pred[, -(1:l)]
 cl = autoStopCluster(parallel::makeCluster(parallel::detectCores()-1))
 doParallel::registerDoParallel(cl)
 mod1 = CAST::ffs(predictors = pred, response = resp, method = "rf", importance = TRUE, trControl = trainctl, 
-                 metric = "RMSE")
+                 metric = "Accuracy")
 #mod1 = caret::train(pred, resp, method = "rf", trControl = trainctl)
 saveRDS(mod1, paste0(getwd(),"/output/models/global.rds"))
 print(paste0("Finished model: ", Sys.time()))
