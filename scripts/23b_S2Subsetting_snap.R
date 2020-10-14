@@ -1,4 +1,4 @@
-### subsetting
+### subsetting via snap operator
 
 #setting the parameter
 setwd("/Volumes/MarvinLaCie/Marvin/BB_rf") # working directory

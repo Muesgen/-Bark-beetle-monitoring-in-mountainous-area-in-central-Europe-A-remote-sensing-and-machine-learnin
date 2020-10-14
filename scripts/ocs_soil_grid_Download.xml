@@ -1,0 +1,4 @@
+<WCS_GDAL>
+  <ServiceURL>https://maps.isric.org/mapserv?map=/map/ocs.map&amp;SERVICE=WCS&amp;VERSION=2.0.1</ServiceURL>
+  <CoverageName>ocs_0-30cm</CoverageName>
+</WCS_GDAL>

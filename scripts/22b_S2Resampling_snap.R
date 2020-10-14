@@ -16,8 +16,10 @@ resampleSize <- 10
 # reading packages
 source(paste0(funfold,"/check_library.R"))
 check_library(pckgs)
+
 #listing sen2 image folders
 Sen2folder <- list.files(paste0(getwd(), Input_dir, Sat_dir,"/"))
+
 #defining resample operator
 prefix.xml <-   paste0("<graph id='sen2resampling'>
                   <version>1.0</version>
@@ -27,7 +29,7 @@ prefix.xml <-   paste0("<graph id='sen2resampling'>
                       <sourceProduct>${sourceProduct}</sourceProduct>
                     </sources>
                     <parameters>
-                      <resolution>",10,"</resolution>
+                      <resolution>",reamplesize,"</resolution>
                       <upsampling>Nearest</upsampling>
                       <downsampling>First</downsampling>
                       <flagDownsampling>First</flagDownsampling>
@@ -40,6 +42,7 @@ prefix.xml <-   paste0("<graph id='sen2resampling'>
 doc <- xmlTreeParse(prefix.xml, useInternalNodes = T) # PARSE STRING
 root <- xmlRoot(doc) #Find Roots  
 print(doc)
+
 #save operator as xml
 saveXML(doc, file= "S2resample.xml")
 f <- paste0(getwd(),"/S2resample.xml") #path to the operator as xm file
@@ -50,6 +53,7 @@ pblapply(Sen2folder, function(x){
   system(paste(gptfile,f,"-t",paste0(getwd(),Output_dir,x,"_resampled.dim"),paste0(getwd(),Input_dir,Sat_dir,"/",x)))
   print(paste("Finish resampling",x,Sys.time()))
 })# you do not have to think about the warnings. https://forum.step.esa.int/t/warning-message-while-resampling-the-sentinel-2-data/13533
+
 #1 argument: the gpt operator
 #2 argument: the resampling operator
 #3 argument: -t the outputfile

@@ -223,3 +223,10 @@ rsaga.geoprocessor(lib = "ta_lighting", module = "Potential Incoming Solar Radia
                                 GRD_DIRECT = direct_insolation_file,
                                 GRD_DIFFUS = diffuse_insolation_file),
                    env = env)
+
+#####################
+
+test <- raster("D:/Marvin/BB_rf/input/observations/soil/SMI_L02_Oberboden_monatlich_1951_2018_inv.nc")
+plot(test)
+values(test)
+names(test)
