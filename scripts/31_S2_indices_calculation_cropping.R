@@ -128,7 +128,7 @@ for(i in 1:length(paths_sentinel_tiles)){ # iterate over all sentinel scene fold
   
   # Set vegetation index and calculate them
   veg_indices <- vegetation_indices
-  RS_indices <- calc_Indices(bands_crop, rgbi = veg_indices)
+  RS_indices <- calc_Indices(bands_crop, rgbi = veg_indices) #new indices calc function, input to function must be changed
   print("indices calculated")
   
   # Write Indices as Images to disk

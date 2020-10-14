@@ -1,33 +1,29 @@
-### function for calculating vegetation indices on sentinel 2
-#band1 = 442nm Wavelength
-#band2 = 492nm Wavelength
-#band3 = 559nm wavelength
-#band4 = 664nm wavelength
-#band5 = 704nm wavelength
-#band8 = 832nm Wavelength
-#band8a = 864nm Wavelength
-#band11 = 1614 nm Wavelength
-#band12 = 2202 nm Wavelength
+### function for calculating vegetation indices on sentinel 2 or aerial Images RED GREEN BLUE
+# also Landsat is possible, please check bandnumber by wavelength
 
 
-calc_Indices<- function(bands, rgbi=c("VVI","VARI","NDTI","RI","CI","BI","SI","HI","TGI","GLI","NGRDI", "ExGR", "VEG")){
+#band1 = 442nm Wavelength AEROSOL
+#band2 = 492nm Wavelength BLUE
+#band3 = 559nm wavelength GREEN
+#band4 = 664nm wavelength RED
+#band5 = 704nm wavelength RED-edge
+#band8 = 832nm Wavelength NIR
+#band8a = 864nm Wavelength NIR
+#band11 = 1614 nm Wavelength SWIR
+#band12 = 2202 nm Wavelength SWIR
+
+#rgbi = Vegetation Index you want to calculate
+
+
+calc_Indices<- function(band1 = NULL, band2 = NULL, band3 = NULL, band4 = NULL, band5 = NULL, band8 = NULL, band8a = NULL,
+                        band11 = NULL, band12 = NULL, 
+                        rgbi=c("VVI","VARI","NDTI","RI","CI","BI","SI","HI","TGI","GLI","NGRDI", "ExGR", "VEG")){
   
   ## compatibility check
   if (raster::nlayers(bands) < 3)
     stop("Argument 'bands' needs to be a Raster* object with at least 9 layers (usually red, green and blues, NIR, SWIR...).")
   
   ### processing
-  
-  
-  ## separate bands
-  band2 <- bands[[1]]
-  band3 <- bands[[2]]
-  band4 <- bands[[3]]
-  band5 <- bands[[5]]
-  band8 <- bands[[4]]
-  band8a <- bands[[6]]
-  band11 <- bands[[7]]
-  band12 <- bands[[8]]
 
 indices <- lapply(rgbi, function(item){
   ## calculate Visible Vegetation Index vvi
@@ -101,63 +97,63 @@ indices <- lapply(rgbi, function(item){
     return(NGRDI)
     
   } else if (item=="ExG"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate Excess Green Index (ExG)")
     ExG <- 2*band3 - band4 - band2 
     names(ExG) <- "ExG"
     return(ExG)
     
   } else if (item=="ExGR"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate  Excess Green Index - Excess Red Index (ExGR)")
     ExGR<- (2*band3 - band4 - band2) - (1.4*band4 - band3)
     names(ExGR) <- "ExGR"
     return(ExGR)
     
   } else if (item=="VEG"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate  Vegetative Index (VEG)")
     VEG<- band3 / (band4**0.667 * band2**0.333)
     names(VEG) <- "VEG"
     return(VEG)
     
   } else if (item=="CIVE"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Color Index of Vegetation Extraction (CIVE)")
     CIVE<- 0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745
     names(CIVE) <- "CIVE"
     return(CIVE)
     
   } else if (item=="COM"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate Combined Index (COM)")
     COM<- 0.25*(2*band3 - band4 - band2) + 0.3* ((2*band3 - band4 - band2) - (1.4*band4 - band3)) + 0.33* (0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745) + 0.12* (band3 / (band4**0.667 * band2**0.333))
     names(COM) <- "COM"
     return(COM)
     
   } else if (item=="CEV"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Combination aus Ponti (CEV)")
     CEV<- 0.33*((1 - abs((band4 - 30) / (band4 + 30))) * (1 - abs((band3 - 50) / (band3 + 50))) * (1 - abs((band2 - 1) / (band2 + 1)))) + 0.33*(2*band3 - band4 - band2) + 0.33*(0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745)
     names(CEV) <- "CEV"
     return(CEV)
     
   } else if (item=="CEV_gew"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Combination aus Ponti (CEV_gew)")
     CEV_gew<- 0.4*((1 - abs((band4 - 30) / (band4 + 30))) * (1 - abs((band3 - 50) / (band3 + 50))) * (1 - abs((band2 - 1) / (band2 + 1)))) + 0.2*(2*band3 - band4 - band2) + 0.4*(0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745)
     names(CEV_gew) <- "CEV_gew"
     return(CEV_gew)
     
   } else if (item=="CEV_ohne"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Combination aus Ponti (CEV_ohne)")
     CEV_ohne<- ((1 - abs((band4 - 30) / (band4 + 30))) * (1 - abs((band3 - 50) / (band3 + 50))) * (1 - abs((band2 - 1) / (band2 + 1)))) + (2*band3 - band4 - band2) + (0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745)
     names(CEV_ohne) <- "CEV_ohne"
     return(CEV_ohne)
     
   } else if (item=="mcfesti"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate mcfesti (mcfesti)")
     mcfesti <- 0.25*(sqrt((band4**2+band3**2+band2*2)/3)) + 0.25*(0.441*band4 - 0.881*band3 + 0.385*band2 + 18.78745) + 0.25*((1 - abs((band4 - 30) / (band4 + 30))) * (1 - abs((band3 - 50) / (band3 + 50))) * (1 - abs((band2 - 1) / (band2 + 1)))) + 0.25*(-0.5*(190*(band4 - band3)- 120*(band4 - band2)))
     names(mcfesti) <- "mcfesti"
@@ -165,7 +161,7 @@ indices <- lapply(rgbi, function(item){
   }
   
   else if (item=="CCCI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Canopy Chlorophyll Content Index (CCCI)")
     CCCI <- ((band8a - band5) / (band8a + band5)) / ((band8a - band4) / (band8a + band4))
     names(CCCI) <- "CCCI"
@@ -173,56 +169,56 @@ indices <- lapply(rgbi, function(item){
   }
   
   else if (item=="CVI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Chlorophyll vegetation index  (CVI)")
     CVI <- band8a * (band5 / band3)
     names(CVI) <- "CVI"
     return(CVI)
   }
   else if (item=="GNDVI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Green Normalized Difference Vegetation Index (GNDVI)")
     GNDVI <- (band8a - band3)/(band8a + band3)
     names(GNDVI) <- "GNDVI"
     return(GNDVI)
   }
   else if (item=="MCARI"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate Modified Chlorophyll Absorption in Reflectance Index (MCARI)")
     MCARI <- ((band5 - band4)-0.2*(band5 - band3))*(band5 / band4)
     names(MCARI) <- "MCARI"
     return(MCARI)
   }
   else if (item=="NDVI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Normalized Differenced Vegetation Index (NDVI)")
     NDVI <- ((band8 - band4) / (band8 + band4))
     names(NDVI) <- "NDVI"
     return(NDVI)
   }
   else if (item=="NDRE"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Normalized Difference NIR/Rededge Normalized Difference Red-Edge (NDRE)")
     NDRE <- ((band8a - band5) / (band8a + band5))
     names(NDRE) <- "NDRE"
     return(NDRE)
   }
   else if (item=="MSI"){
-    # NGRDI Normalized green red difference index 
+     
     print("\ncalculate Moisture Stress Index (MSI)")
     MSI <- band11/band8
     names(MSI) <- "MSI"
     return(MSI)
   }
   else if (item=="NDVWI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate multi-temporal normalized differencevegetation-water index (NDVWI)")
     NDVWI <- ((band8-band4)/(band8+band4))+((band8-band11)/(band8+band11))
     names(NDVWI) <- "NDVWI"
     return(NDVWI)
   }
   else if (item=="BRI"){
-    # NGRDI Normalized green red difference index 
+    
     print("\ncalculate Browning Reflectance Index (BRI)")
     BRI <- ((1 / band3) - (1 / band5)) / band8a
     names(BRI) <- "BRI"
