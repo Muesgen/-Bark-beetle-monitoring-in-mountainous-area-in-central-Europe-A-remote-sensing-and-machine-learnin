@@ -4,6 +4,7 @@
 # Author: Marvin Müsgen
 # Description: In this Skripts the data from the Sentinel 1 pca rasters were extracted from point coordinates of observations
 #---
+
 #Setting Paths
 observations <- "o_total.csv" # name of observation data
 setwd("/Volumes/MarvinLaCie/Marvin/BB_rf") # setting working directory

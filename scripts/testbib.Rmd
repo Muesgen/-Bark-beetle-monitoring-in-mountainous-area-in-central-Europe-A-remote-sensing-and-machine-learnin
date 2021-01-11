@@ -1,0 +1,27 @@
+---
+title: "Masterthesis"
+author: "Marvin Muesgen"
+geometry: margin=3in
+output:
+  bookdown::pdf_document2: default
+  html_document:
+    df_print: paged
+    number_sections: true
+  pdf_document:
+    number_sections: true
+bibliography: D:/Marvin/BB_rf/doc/literature/used_in_thesis/Bark-Beetle-Masterthesis.bib
+---
+
+blah bla @Abdullah2019
+
+Hallo mein name ist hase. ich schreibe hier ein schnelles flitze buch über remote sensing. Remote Sensing habe ich vertieft in meinem Master der physischen Geographie an der Universität Marburg. Meine Bachelor habe ich in Aachen and er Rwth Aachen University am Fachbereich 5/4 Geographie absolviert. In meiner beruflich Laufbahn habe ich 5 Wochen bei der Stadt aachen in der Verkehrsplanung gearbeiten und 1 1/2 Jahre am Institut für Gender und Diversity. Währen meines Masters habe ich 3 Praktika absolviert. aBDJHba
+
+# The first section
+
+## the second
+
+\newpage
+
+# The second section
+
+#references

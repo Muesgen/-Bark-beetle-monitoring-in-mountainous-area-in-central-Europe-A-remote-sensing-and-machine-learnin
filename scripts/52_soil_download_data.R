@@ -64,6 +64,8 @@ voi = "ocs" # variable of interest
 depth = "5-15cm"
 quantile = "Q0.5"
 
+
+
 voi_layer = paste(voi,depth,quantile, sep="_") # layer of interest 
 #We set other variables necessary for the WCS call for all kinds of requests
 wcs_path = paste0("https://maps.isric.org/mapserv?map=/map/",voi,".map") # Path to the WCS. See maps.isric.org

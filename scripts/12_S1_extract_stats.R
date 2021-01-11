@@ -1,12 +1,13 @@
 ############# SKript for extracting Rasters #############
 
 ######Setting parameters#########
-observations <- "o_total.csv" # name of observation data
+observations <- "barkbeetle_obs_x_to_2018_2class.csv" # name of observation data
+#/Volumes/MarvinLaCie/Marvin/BB_rf/input/observations/Befall_gesamt/barkbeetle_obs_x_to_2018_2class.csv
 setwd("D:/Marvin/BB_rf") # setting working directory
 Input_dir <- "/input" # inpiut directory
-Sat_dir <- "/sentinel_1_preproc" # satellite direcotry
-sub_dir <- "/Ascending" # sub directory
-Output_dir <- "/output/Sen1" # output directory
+Sat_dir <- "/sentinel_1_preproc2" # satellite direcotry
+sub_dir <- "/Descending" # sub directory
+Output_dir <- "/output/Sen1_2" # output directory
 # nedded packages:
 pckgs <- c("velox","raster","rgdal","pbapply","doParallel", "gdalUtils","rgeos","sp", "matrixStats","dplyr","terra")
 funfold= paste0(getwd(),"/functions") # function folder directory
@@ -16,7 +17,7 @@ ext <- "/observations/NP_Boundary.shp" # File in Input_dir: Polygon Shapefile wi
 xcoordcolnum <- 3 # column number of the x coordinate of your obseravtion date
 ycoordcolnum <- 4 # column number of the y coordinate of your observation data
 projObs <- "+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs"  # Projection of the x and y column of observation file
-pols <- c("VH","VV","ratio") # SAR Polarizations
+pols <- c("VH","VV") # SAR Polarizations
 ###################################
 
 ########sourcing functions#########
@@ -27,7 +28,7 @@ source(paste0(funfold,"/statistic_function.R"))
 check_library(pckgs)
 
 #Listing the Dates of Images
-files_dates<- as.character(as.Date(substr(list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"),full.names = FALSE, pattern = ".tif$"), 18, 26), format="%Y%m%d"))
+files_dates<- as.character(as.Date(substr(list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"),full.names = FALSE, pattern = "ext.tif$"), 18, 26), format="%Y%m%d"))
 print("File dates are listed")
 print(files_dates)
 #Listing the month for filtering later the files dates
@@ -68,15 +69,20 @@ if (lapply(ras_list, function(X){ extRas@extent == X@extent }) == TRUE){
   print("Extents are equal")
   rs <- stack(ras_list)
 }
+nlayers(rs)
 
 ###reading the obeservation shape and setting the projection
 
 #read in the observations
-obs <-read.csv(paste0(getwd(),Input_dir,"/observations/", observations))
+#obs <-read.csv(paste0(getwd(),Input_dir,"/observations/", observations))
+obs <- read.csv("E:/Marvin/BB_rf/input/observations/Befall_gesamt/barkbeetle_obs_2018_3class.csv")
 print("observations loaded")
 head(obs)
 obs[,5:ncol(obs)] <- NULL
 #defining coordinates, Lat = Y Long = X
+obs[,xcoordcolnum] <- as.numeric(obs[,xcoordcolnum])
+obs[,ycoordcolnum] <- as.numeric(obs[,ycoordcolnum])
+
 xy <- obs[,c(xcoordcolnum,ycoordcolnum)]
 xy <-as.list(xy)
 
@@ -91,13 +97,19 @@ if (is.null(projObs) == TRUE){
 } else{
   #creating a spatioalpointdataframe
   spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
-                                 proj4string = CRS(projObs))
+                                 proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs"))
   print("Spatialdataframe is created")
   head(spdf)
 }
 #transforming into correct projection
-r_crs<- rs[[1]]@crs
-spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
+dummy <- readOGR("E:/Marvin/NP_Boundary.shp")
+dummy@proj4string@projargs
+
+temp2 <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*ext.tif", full.names = TRUE)
+temp
+rs <- stack(temp2)
+#r_crs<- rs[[1]]@crs
+#spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
 
 #extracting raster values
 print(paste0("Starting extracting raster data for observation points: ", Sys.time()))
@@ -117,56 +129,53 @@ if(length(rs@layers) == length(files_dates)){
   #files_d<- unlist(files_d, recursive = FALSE) # unlisting nested lists
   n <- length(rs@layers) / length(files_dates)
   for (i in 1: length(files_dates)){#renaming colnames with dates and polarization
-    colnames(df)[n*i] <- paste0(files_dates[i],"ratio")
-    colnames(df)[n*i-1] <- paste0(files_dates[i],"VV")
-    colnames(df)[n*i-2] <- paste0(files_dates[i],"VH")
+    #colnames(df)[n*i] <- paste0(files_dates[i],"ratio")
+    colnames(df)[n*i] <- paste0(files_dates[i],"VV")
+    colnames(df)[n*i-1] <- paste0(files_dates[i],"VH")
   }
 }
-
+length(colnames(df))
+names(rs)
 obs <- cbind(obs,df)
 
-write.csv(obs,file = paste0(getwd(),Output_dir,sub_dir, "/_Extracted_data",start,end,".csv"))
-terra::writeRaster(rs, paste0(getwd(),Output_dir,sub_dir, "/_Sen1_Descending_Stack.tif"), overwrite=TRUE)
+
+#write.csv(obs,file = paste0(getwd(),Output_dir,sub_dir, "/_Extracted_data_2",start,end,".csv"))
+write.csv(obs,file = paste0("E:/Marvin/BB_rf/output/Sen1_3/_Extracted_data_3",start,end,".csv"))
+"E:\Marvin\BB_rf\output\Sen1_3"
+
+terra::writeRaster(rs, paste0(getwd(),Output_dir,sub_dir, "/_Sen1_Ascending_Stack2.tif"), overwrite=TRUE)
 
 ####### Statistics #########
 
 #splitting data frame into polarization
 #calculating the statistics
 pblapply(pols,function(x){
-  obs_stats <- as.data.frame(matrix(ncol=7,nrow= NROW(obs)))
-  headers <-c(paste0(x,"_means"), paste0(x,"_max"), paste0(x,"_min"), paste0(x,"_25q"), 
-             paste0(x,"_75q"), paste0(x,"_sd"), paste0(x,"_median"))
+  obs_stats <- as.data.frame(matrix(ncol=4,nrow= NROW(obs)))
+  headers <-c(paste0(x,"_means"), paste0(x,"_max"), paste0(x,"_min"), paste0(x,"_sd"))
   colnames(obs_stats) <- headers
   obs_I <- obs[,grepl(x, colnames(obs))]
   obs_stats[,1] <- rowMeans(obs_I[,1:ncol(obs_I)], 1, na.rm = TRUE) #mean
   obs_stats[,2] <- apply(obs_I[,1:ncol(obs_I)],1, max, na.rm = TRUE) #maximum
   obs_stats[,3] <- apply(obs_I[,1:ncol(obs_I)],1, min, na.rm = TRUE) # min
-  obs_quants <- cbind(obs_I, t(apply(obs_I, 1, quantile, c(0.25, .5, .75)))) #calc the quantiles
-  obs_stats[,4] <- obs_quants$`25%`  #25 quantile
-  obs_stats[,5] <- obs_quants$`75%` # 25 quantile
-  obs_stats[,6] <- apply(obs_I[,1:ncol(obs_I)],1, sd, na.rm=TRUE) # standard deviaton
-  obs_stats[,7] <- obs_quants$`50%` #median
-  write.csv(obs_stats, file = paste0(getwd(),Output_dir,sub_dir, "/observation_stats",start,end,x,".csv"))
+  obs_stats[,4] <- apply(obs_I[,1:ncol(obs_I)],1, sd, na.rm=TRUE) # standard deviaton
+  #write.csv(obs_stats, file = paste0(getwd(),Output_dir,sub_dir, "/observation_stats",start,end,x,"2.csv"))
+  write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/Sen1_3/observation_stats",start,end,x,"3.csv"))
   lapply(month, function(y){
-    month_stats <- as.data.frame(matrix(ncol=7,nrow= NROW(obs)))
-    headers <-c(paste0(x,y,"_means"), paste0(x,y,"_max"), paste0(x,y,"_min"), paste0(x,y,"_25q"), 
-                paste0(x,y,"_75q"), paste0(x,y,"_sd"), paste0(x,y,"_median"))
+    month_stats <- as.data.frame(matrix(ncol=4,nrow= NROW(obs)))
+    headers <-c(paste0(x,y,"_means"), paste0(x,y,"_max"), paste0(x,y,"_min"), paste0(x,y,"_sd"))
     colnames(month_stats) <- headers
     obs_IM <- obs_I[,grepl(y, colnames(obs_I))]
     month_stats[,1] <- rowMeans(obs_IM[,1:ncol(obs_IM)], 1, na.rm = TRUE) #mean
     month_stats[,2] <- apply(obs_IM[,1:ncol(obs_IM)],1, max, na.rm = TRUE) #maximum
     month_stats[,3] <- apply(obs_IM[,1:ncol(obs_IM)],1, min, na.rm = TRUE) # min
-    obs_quants_M <- cbind(obs_IM, t(apply(obs_IM, 1, quantile, c(0.25, .5, .75)))) #calc the quantiles
-    month_stats[,4] <- obs_quants_M$`25%`  #25 quantile
-    month_stats[,5] <- obs_quants_M$`75%` # 25 quantile
-    month_stats[,6] <- apply(obs_IM[,1:ncol(obs_IM)],1, sd, na.rm=TRUE) # standard deviaton
-    month_stats[,7] <- obs_quants_M$`50%` #median
-    write.csv(month_stats, file = paste0(getwd(),Output_dir,sub_dir, "/observation_stats",x,y,".csv"))
+    month_stats[,4] <- apply(obs_IM[,1:ncol(obs_IM)],1, sd, na.rm=TRUE) # standard deviaton
+    #write.csv(month_stats, file = paste0(getwd(),Output_dir,sub_dir, "/observation_stats",x,y,"2.csv"))
+    write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/Sen1_3/observation_stats",x,y,"3.csv"))
+    
     })
   })
 
 ####### raster statistics #######
-#n <- match(x, pols)
 ###renaming the rasterlayer by their polarization
 n <- length(names(rs)) / length(files_dates)
 name <- names(rs)
@@ -174,9 +183,9 @@ for (i in 1: length(files_dates)){#renaming colnames with dates and polarization
   #names(rs)[n*i] <- paste0(names(rs)[n*i],"ratio")
   #names(rs)[n*i-1] <- paste0(names(rs)[n*i-1],"VV")
   #names(rs)[n*i-2] <- paste0(names(rs)[n*i-2],"VH")
-  name[n*i] <- paste0(name[n*i],"ratio")
-  name[n*i-1] <- paste0(name[n*i-1],"VV")
-  name[n*i-2] <- paste0(name[n*i-2],"VH")
+  #name[n*i] <- paste0(name[n*i],"ratio")
+  name[n*i] <- paste0(name[n*i],"VV")
+  name[n*i-1] <- paste0(name[n*i-1],"VH")
 }
 
 #s <- lapply(pols, function (x){
@@ -197,25 +206,16 @@ pblapply(pols, function(x){
   rs_min <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = min, na.rm = TRUE)
   print("max...")
   rs_max <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = max, na.rm = TRUE)
-  print("75th quantile..")
-  rs_75q <- clusterR(rs_stat,fq75)
-  print("25th quantile..")
-  rs_25q <- clusterR(rs_stat,fq25)
-  print("standard deviation...")
   rs_sd <- clusterR(rs_stat,fqsd)
-  print("median...")
-  rs_median <- clusterR(rs_stat,fq50)
+
   endCluster()
   print(paste0(" raster statistics are calculated succesfully for whole time period of polarization: ",x," ",Sys.time()))
   print(paste0("start writing raster statistics for whole time period: ",x," ",Sys.time()))
-  terra::writeRaster(rs_mean, paste0(getwd(),Output_dir,sub_dir,"/",x,"_mean_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_max, paste0(getwd(),Output_dir,sub_dir,"/",x,"_max_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_min, paste0(getwd(),Output_dir,sub_dir,"/",x,"_min_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_75q, paste0(getwd(),Output_dir,sub_dir,"/",x,"_75q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_25q, paste0(getwd(),Output_dir,sub_dir,"/",x,"_25q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_sd, paste0(getwd(),Output_dir,sub_dir,"/",x,"_sd_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_median, paste0(getwd(),Output_dir,sub_dir,"/",x,"_median_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  rm(rs_mean,rs_max,rs_min,rs_75q,rs_25q,rs_sd, rs_median)
+  terra::writeRaster(rs_mean, paste0(getwd(),Output_dir,sub_dir,"/",x,"_mean_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_max, paste0(getwd(),Output_dir,sub_dir,"/",x,"_max_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_min, paste0(getwd(),Output_dir,sub_dir,"/",x,"_min_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_sd, paste0(getwd(),Output_dir,sub_dir,"/",x,"_sd_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  rm(rs_mean,rs_max,rs_min,rs_sd)
   print(paste0("Finish writing raster statistics for whole time period: ",x," ",Sys.time()))
   pblapply(month, function(y){
     m_dates<- as.character(as.Date(substr(names(rs_stat), 18, 26), format="%Y%m%d"))
@@ -230,82 +230,18 @@ pblapply(pols, function(x){
     rsm_min <- stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = min, na.rm = TRUE)
     print("max...")
     rsm_max <- stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = max, na.rm = TRUE)
-    print("75th quantile...")
-    rsm_75q <- clusterR(rs_month,fq75)
-    print("25th quantile...")
-    rsm_25q <- clusterR(rs_month,fq25)
-    print("standard deviaton...")
     rsm_sd <- clusterR(rs_month,fqsd)
     print("median...")
-    rsm_median <- clusterR(rs_month,fq50)
     endCluster()
     print(paste0("Finished calculating raster statistics for month ",y," of polarization: ",x," ",Sys.time()))
     print(paste0("start writing raster statistic for whole time period: ", x, " ",Sys.time()))
-    terra::writeRaster(rsm_mean, paste0(getwd(),Output_dir,sub_dir,"/",x,"_mean_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_max, paste0(getwd(),Output_dir,sub_dir,"/",x,"_max_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_min, paste0(getwd(),Output_dir,sub_dir,"/",x,"_min_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_75q, paste0(getwd(),Output_dir,sub_dir,"/",x,"_75q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_25q, paste0(getwd(),Output_dir,sub_dir,"/",x,"_25q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_sd, paste0(getwd(),Output_dir,sub_dir,"/",x,"_sd_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_median, paste0(getwd(),Output_dir,sub_dir,"/",x,"_median_from ",y,".tif"), overwrite=TRUE)
-    rm(rs_month,rsm_mean,rsm_max,rsm_min,rsm_75q,rsm_25q,rsm_sd, rsm_median)
+    terra::writeRaster(rsm_mean, paste0(getwd(),Output_dir,sub_dir,"/",x,"_mean_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_max, paste0(getwd(),Output_dir,sub_dir,"/",x,"_max_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_min, paste0(getwd(),Output_dir,sub_dir,"/",x,"_min_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_sd, paste0(getwd(),Output_dir,sub_dir,"/",x,"_sd_from ",y,"2.tif"), overwrite=TRUE)
+    rm(rs_month,rsm_mean,rsm_max,rsm_min,rsm_sd)
     print(paste0(" raster statistics for month ", y,"of polarization ",x," are written succesfully"))
   })
   rm(rs_stat)
 })
 
-###################possible solutions##########################
-#}
-#gdalwarp(f, sub('\\.tif', '_clipped.tif', f), tr=tr, 
-#         r='bilinear', te=c(e), multi=TRUE)
-#system.time(sapply(ras_list, function(f){ 
-#  gdalwarp(f, sub('\\.tif', '_cliped.tif', f), tr=tr, r='bilinear', 
-#           te=c(e), multi=TRUE)
-#))
-#pbsapply(temp, function(x){
-#  gdalUtils::align_rasters(x,temp[[1]],dstfile = sub('\\.tif', '_ext.tif', x),nThreads = 7)
-#})
-#extRas@extent
-#else{
-#  print("Extents are equal")
-#}
-
-#Checking if Extents are the same
-#extRas <- ras_list[[1]]
-#if (lapply(ras_list, function(X){ extRas@extent == X@extent }) == TRUE){
-#  print("Extents of Rasters are not equal, extent of rasters will be alligned in 2 steps")
-#  shp <- readOGR(dsn=paste0(getwd(),Input_dir,ext)) #reading shapefile with area of iterest
-#  shp <- sp::spTransform(shp, CRS(proj4string(extRas))) #setting the crs argument
-#  print("Cropping the rasters")
-#  ras_list <- pbapply::pblapply(ras_list, function(X){
-#    raster::crop(X,shp) #cropping the rasters
-#    writeRaster(X, paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/test",X,".tif"))
-#  })
-#  print("Resampling the rasters")
-#  UseCores <- detectCores() -1
-#  cl <- makeCluster(UseCores)
-#  registerDoParallel(cl) 
-#  ras_list  <- pbapply::pblapply(ras_list, function(X){
-#      raster::resample(extRas,X, method="bilinear")
-#  })
-#  print("Extent of the Rasters are equal")
-#}
-
-
-#lapply(ras_list, function(X){
-#raster::resample(extent,X, method="bilinear")
-#})
-#e= c(8.183057,8.371883,48.49067,48.69494)
-#y <- gdalwarp(X, ras_list[[2]], r='bilinear', 
-#              te=c(e), multi=TRUE)##
-
-#lapply(ras_list,function(X){
-#  ras_list[[2]]@extent <- alignExtent(extent@extent, ras_list[[2]], snap = "near")
-#  return(r_align)})
-#X = ras_list[[2]]
-#rs<- stack(ras_list[[1]],ras_list[[2]])
-#rs[[2]]
-
-
-#obs_VV <- obs[,grepl("VV", colnames(obs))]
-#obs_VH <- obs[,grepl("VH", colnames(obs))]

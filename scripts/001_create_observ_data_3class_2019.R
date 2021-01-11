@@ -7,7 +7,7 @@
 #---
 
 #set working directory
-setwd("/Volumes/MarvinLaCie/Marvin/BB_rf")
+setwd("E:/Marvin/BB_rf")
 Input_dir <- "/input/observations/Befall_gesamt/"
 develop_zone <- "Gesamtbefall_Entwicklungszone.shp"
 core_zone <- "/Gesamtbefall_Kernzone.shp"
@@ -33,12 +33,12 @@ area <- readOGR(area)
 core <- core[which(grepl("DFE; eingeschlagen", core$BEMERKUNG) == FALSE), ] # only standing trees
 core <- core[which(grepl("Baumart?", core$Fraglich) == FALSE), ] # only correct trees
 #core_X_2019 <- core[which(core$Jahr_2 >= year_obs),] # only correct time
-core_x_2019 <- core
+core_x_2018 <- core
 
 develop <- develop[which(grepl("?", develop$Fraglich) == FALSE), ] # only correct trees
 develop <- develop[which(grepl("DFE; eingeschlagen", develop$BEMERKUNG) == FALSE), ] # only standing tress
 #develop_X_2019 <- develop[which(develop$Jahr_2 >= year_obs),] # only correct time
-develop_X_2019 <- develop 
+develop_X_2018 <- develop 
 
 #remove columns
 core_x <- core_x_2019[, 25] # only year
@@ -51,11 +51,11 @@ observations <- rbind(core_x, develop_x, makeUniqueIDs = TRUE)
 observations <- spTransform(observations, CRSobj = area@proj4string@projargs)
 
 #creating sampling point data
-Sample_old <- spsample(observations[which(observations$Jahr_2 <= 2018),], 3333, type = "random")
-Sample_2019 <- spsample(observations[which(observations$Jahr_2 == 2019),], 3333, type = "random")
+Sample_old <- spsample(observations[which(observations$Jahr_2 == 2017),], 3333, type = "random")
+Sample_2018 <- spsample(observations[which(observations$Jahr_2 == 2018),], 3333, type = "random")
 
 #transform into correct projection
-Sample_2019 <- spTransform(Sample_2019, CRSobj = area@proj4string@projargs)
+Sample_2018 <- spTransform(Sample_2018, CRSobj = area@proj4string@projargs)
 Sample_old <- spTransform(Sample_old, CRSobj = area@proj4string@projargs)
 
 #create healthy sample polygon
@@ -93,11 +93,11 @@ obs <- rbind(df, df_not_healthy)
 df_new <- data.frame(1:3333)
 colnames(df_new) <- "observations"
 df_new$observations <- 2 # bark beetle attack recognized 2019
-df_new <- cbind(df_new, Sample_2019@coords)
+df_new <- cbind(df_new, Sample_2018@coords)
 
 #create observation data frame
 obs <- rbind(obs, df_new)
 
 #write out observation
-write.csv(obs, file=paste0(getwd(), "/input/observations/Befall_gesamt/barkbeetle_obs_2019_3class.csv"))
+write.csv(obs, file=paste0(getwd(), "/input/observations/Befall_gesamt/barkbeetle_obs_2018_3class.csv"))
 

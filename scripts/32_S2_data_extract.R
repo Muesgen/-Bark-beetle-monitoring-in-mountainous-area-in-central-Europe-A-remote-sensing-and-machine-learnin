@@ -1,7 +1,7 @@
 ########## Remove cloud pixel from Sentinel data, calucate raster statistics and do a principal component analysis ##########
 #---
 # title: "Sentinel 2  raster_calc"
-# Author: Marvin MÃüsgen
+# Author: Marvin M??sgen
 # Description: This Script remove cloud values fro
 #---
  
@@ -62,11 +62,16 @@ head(obs)
 #defining coordinates, Lat = Y Long = X
 xy <- obs[,c(xcoordcolnum,ycoordcolnum)]
 xy <-as.list(xy)
+obs[,xcoordcolnum] <- as.numeric(obs[,xcoordcolnum])
+obs[,ycoordcolnum] <- as.numeric(obs[,ycoordcolnum])
 f <-paste0(getwd(),"/output/Sen2/used_indices.txt")
+
+dummy <- readOGR("/Volumes/MarvinLaCie/Marvin/NP_Boundary.shp")
+dummy@proj4string@projargs
 if (is.null(projObs) == TRUE){
   #creating a spatioalpointdataframe
   spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
-                                 proj4string = CRS(rs[[1]]@crs@projargs))
+                                 proj4string = CRS(rs_list[[1]]@crs@projargs))
   print("Spatialdataframe is created")
   head(spdf)
   print("POSSIBLE ERROR: Please check the outwritten DataFrame, could be with NAs")
@@ -74,11 +79,11 @@ if (is.null(projObs) == TRUE){
 } else{
   #creating a spatioalpointdataframe
   spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
-                                 proj4string = CRS(projObs))
+                                 proj4string = CRS(dummy@proj4string@projargs))
   print("Spatialdataframe is created")
   head(spdf)
 }
-
+#dummy <- readOGR("/Volumes/MarvinLaCie/Marvin/NP_Boundary.shp")
 #transforming into correct projection
 r_crs<- rs_list[[1]]@crs
 spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
@@ -103,7 +108,7 @@ for (i in 1:length(rs_list)){
   obs <- cbind(obs,df)
 }
 
-write.csv(obs,file = paste0(getwd(),"/output/Sen2/_Extracted_data",start,end,".csv"))
+write.csv(obs,file = paste0(getwd(),"/output/Sen2/_Extracted_data",start,end,"2.csv"))
 
 ####### Extracting clouds ######
 
@@ -158,12 +163,12 @@ for (i in 1:nlayers(rs_clouds)){
   obs <- cbind(obs,df)
 }
 
-write.csv(obs, paste0(getwd(),"/output/Sen2/_Extracted_SCL",start,end,".csv"))
+write.csv(obs, paste0(getwd(),"/output/Sen2/_Extracted_SCL",start,end,"2.csv"))
 
 ####### Remove Clouds and cloud shadows from extracted data #######
 
-scl <- read.csv(paste0(getwd(),"/output/Sen2/_Extracted_SCL2018-04-012018-09-30.csv"))
-data <- read.csv(paste0(getwd(),"/output/Sen2/_Extracted_data2018-04-012018-09-30.csv")) 
+scl <- read.csv(paste0(getwd(),"/output/Sen2/_Extracted_SCL2018-04-012018-09-302.csv"))
+data <- read.csv(paste0(getwd(),"/output/Sen2/_Extracted_data2018-04-012018-09-302.csv")) 
 
 for (i in 1:length(cloud_dates)){
   print(paste0("Succesfully removed cloud pixels ",cloud_dates[i]))
@@ -175,49 +180,39 @@ for (i in 1:length(cloud_dates)){
   data[rows,str_detect(colnames(data), cloud_dates[i]) == TRUE] <- NA
 }
 
-write.csv(data, paste0(getwd(),"/output/Sen2/_Extracted_data_no_clouds",start,end,".csv"))
+write.csv(data, paste0(getwd(),"/output/Sen2/_Extracted_data_no_clouds",start,end,"2.csv"))
 
 ####### Statistics #########
 #calculating statistics from the observation points and write it to data frame
 obs <- data
 #splitting data frame into indices and calculating the statistics
 pblapply(veg_names,function(x){
-  obs_stats <- as.data.frame(matrix(ncol=7,nrow= NROW(obs)))
-  headers <-c(paste0(x,"_means"), paste0(x,"_max"), paste0(x,"_min"), paste0(x,"_25q"), 
-             paste0(x,"_75q"), paste0(x,"_sd"), paste0(x,"_median"))
+  obs_stats <- as.data.frame(matrix(ncol=4,nrow= NROW(obs)))
+  headers <-c(paste0(x,"_means"), paste0(x,"_max"), paste0(x,"_min"), paste0(x,"_sd"))
   colnames(obs_stats) <- headers
   obs_I <- obs[,grepl(x, colnames(obs))]
   obs_stats[,1] <- rowMeans(obs_I[,1:ncol(obs_I)], 1, na.rm = TRUE) #mean
   obs_stats[,2] <- apply(obs_I[,1:ncol(obs_I)],1, max, na.rm = TRUE) #maximum
   obs_stats[,3] <- apply(obs_I[,1:ncol(obs_I)],1, min, na.rm = TRUE) # min
-  obs_quants <- cbind(obs_I, t(apply(obs_I, 1, quantile, c(0.25, .5, .75), na.rm = TRUE))) #calc the quantiles
-  obs_stats[,4] <- obs_quants$`25%`  #25 quantile
-  obs_stats[,5] <- obs_quants$`75%` # 25 quantile
-  obs_stats[,6] <- apply(obs_I[,1:ncol(obs_I)],1, sd, na.rm=TRUE) # standard deviaton
-  obs_stats[,7] <- obs_quants$`50%` #median
+  obs_stats[,4] <- apply(obs_I[,1:ncol(obs_I)],1, sd, na.rm=TRUE) # standard deviaton
   index1 <- which(obs_stats == Inf | obs_stats == -Inf | obs_stats == NA) # list index of wrong data
   obs_stats[index1,] <- NA
   is.na(obs_stats) <- do.call(cbind,lapply(obs_stats, is.infinite))
-  write.csv(obs_stats, file = paste0(getwd(),"/output/Sen2/observation_stats_without_cloudvalues",start,end,x,".csv"))
+  write.csv(obs_stats, file = paste0(getwd(),"/output/Sen2/observation_stats_without_cloudvalues",start,end,x,"2.csv"))
   #calculating statistics for every vegetation indix and month
   lapply(month, function(y){
     month_stats <- as.data.frame(matrix(ncol=7,nrow= NROW(obs)))
-    headers <-c(paste0(x,y,"_means"), paste0(x,y,"_max"), paste0(x,y,"_min"), paste0(x,y,"_25q"), 
-                paste0(x,y,"_75q"), paste0(x,y,"_sd"), paste0(x,y,"_median"))
+    headers <-c(paste0(x,y,"_means"), paste0(x,y,"_max"), paste0(x,y,"_min"), paste0(x,y,"_sd"))
     colnames(month_stats) <- headers
     obs_IM <- obs_I[,grepl(y, colnames(obs_I))]
     month_stats[,1] <- rowMeans(obs_IM[,1:ncol(obs_IM)], 1, na.rm = TRUE) #mean
     month_stats[,2] <- apply(obs_IM[,1:ncol(obs_IM)],1, max, na.rm = TRUE) #maximum
     month_stats[,3] <- apply(obs_IM[,1:ncol(obs_IM)],1, min, na.rm = TRUE) # min
-    obs_quants_M <- cbind(obs_IM, t(apply(obs_IM, 1, quantile, c(0.25, .5, .75), na.rm = TRUE))) #calc the quantiles
-    month_stats[,4] <- obs_quants_M$`25%`  #25 quantile
-    month_stats[,5] <- obs_quants_M$`75%` # 25 quantile
-    month_stats[,6] <- apply(obs_IM[,1:ncol(obs_IM)],1, sd, na.rm=TRUE) # standard deviaton
-    month_stats[,7] <- obs_quants_M$`50%` #median
+    month_stats[,4] <- apply(obs_IM[,1:ncol(obs_IM)],1, sd, na.rm=TRUE) # standard deviaton
     index2 <- which(obs_stats == Inf | obs_stats == -Inf | obs_stats == NA) #list index if wrong data
     month_stats[index2,] <- NA
     is.na(month_stats) <- do.call(cbind,lapply(month_stats, is.infinite))
-    write.csv(month_stats, file = paste0(getwd(),"/output/Sen2/observation_stats_without_cloudvalues",x,y,".csv"))
+    write.csv(month_stats, file = paste0(getwd(),"/output/Sen2/observation_stats_without_cloudvalues",x,y,"2.csv"))
     })
   })
 
@@ -288,7 +283,7 @@ for (i in 1:length(cloud_dates)){
   ras_masked <- raster::stack(ras_masked,temp_ras)
   print(paste0("finished ", cloud_dates[i]))
 }
-terra::writeRaster(ras_masked, paste0(getwd(),"/output/Sen2/rasterVEGIndices_clouds_masked_out.tif"), overwrite=TRUE)
+terra::writeRaster(ras_masked, paste0(getwd(),"/output/Sen2/rasterVEGIndices_clouds_masked_out2.tif"), overwrite=TRUE)
 
 
 ### calculating raster statistics
@@ -302,28 +297,20 @@ pblapply(veg_names, function(x){
   rs_min <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = min, na.rm = TRUE)
   print("max...")
   rs_max <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = max, na.rm = TRUE)
-  print("75th quantile..")
-  rs_75q <- clusterR(rs_stat,fq75)
-  print("25th quantile..")
-  rs_25q <- clusterR(rs_stat,fq25)
   print("standard deviation...")
   rs_sd <- clusterR(rs_stat,fqsd)
-  print("median...")
-  rs_median <- clusterR(rs_stat,fq50)
   endCluster()
   print(paste0(" raster statistics are calculated succesfully for whole time period of polarization: ",x," ",Sys.time()))
   print(paste0("start writing raster statistics for whole time period: ",x," ",Sys.time()))
-  terra::writeRaster(rs_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_75q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_75q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_25q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_25q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_median, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_median_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  rm(rs_mean,rs_max,rs_min,rs_75q,rs_25q,rs_sd, rs_median)
+  terra::writeRaster(rs_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  terra::writeRaster(rs_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from",start,"_to_",end,"2.tif"), overwrite=TRUE)
+  rm(rs_mean,rs_max,rs_min,rs_sd)
   print(paste0("Finish writing raster statistics for whole time period: ",x," ",Sys.time()))
   pblapply(month, function(y){
-    m_dates<- as.character(substr(names(rs_stat), 12, 19))
+    m_dates<- as.character(substr(names(rs_stat), 2, 9))
+    #m_dates<- as.character(substr(names(rs_stat), 12, 19))
     index <- which(m_dates %in% m_dates[grepl(y, m_dates)])# getting the Index of selected rasters in time period
     rs_month <- rs_stat[[index]]
     print(paste0("start calulating raster statistics for month ",y," of vegetation Index: ",x," ",Sys.time()))
@@ -336,24 +323,15 @@ pblapply(veg_names, function(x){
     print("max...")
     rsm_max <- stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = max, na.rm = TRUE)
     print("75th quantile...")
-    rsm_75q <- clusterR(rs_month,fq75)
-    print("25th quantile...")
-    rsm_25q <- clusterR(rs_month,fq25)
-    print("standard deviaton...")
     rsm_sd <- clusterR(rs_month,fqsd)
-    print("median...")
-    rsm_median <- clusterR(rs_month,fq50)
     endCluster()
     print(paste0("Finished calculating raster statistics for month ",y," of vegetation index: ",x," ",Sys.time()))
     print(paste0("start writing raster statistic for month: ", x, " ",Sys.time()))
-    terra::writeRaster(rsm_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_75q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_75q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_25q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_25q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_median, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_median_from ",y,".tif"), overwrite=TRUE)
-    rm(rs_month,rsm_mean,rsm_max,rsm_min,rsm_75q,rsm_25q,rsm_sd, rsm_median)
+    terra::writeRaster(rsm_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from ",y,"2.tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from ",y,"2.tif"), overwrite=TRUE)
+    rm(rs_month,rsm_mean,rsm_max,rsm_min,rsm_sd)
     print(paste0(" raster statistics for month ", y,"of Vegetation Index ",x," are written succesfully"))
   })
   rm(rs_stat)
