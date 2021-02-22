@@ -5,15 +5,15 @@
 # Description: The observation data which is in polygon format is prepared for the analysis process. Points from
 #              the polygon format will be created for the time of interest,
 #---
-
+getwd()
 #set working directory
-setwd("E:/MarvinLaCie/Marvin/BB_rf")
+setwd("E:/Marvin/BB_rf")
 Input_dir <- "/input/observations/Befall_gesamt/"
 develop_zone <- "Gesamtbefall_Entwicklungszone.shp"
 core_zone <- "/Gesamtbefall_Kernzone.shp"
 funfold <- funfold <-  paste0(getwd(),"/functions") #path to function folder
 area <- paste0(getwd(), "/input/observations/NP_Boundary.shp")
-  
+
 #Set variables 
 pckgs <- c("sp", "rgdal", "raster", "rgeos")
 year_obs <- 2018
@@ -48,38 +48,44 @@ observations <- rbind(core_x, develop_x, makeUniqueIDs = TRUE)
 observations <- spTransform(observations, CRSobj = area@proj4string@projargs)
 
 #creating sampling point
-Sample_x_2018 <- spsample(observations, 5000, type = "random")
-
+Sample_older_2018 <- spsample(observations[which(as.numeric(as.character(observations$Jahr_2)) < 2018),], 3333, type = "random")
+Sample_new_2018 <- spsample(observations[which(as.numeric(as.character(observations$Jahr_2)) == 2018 ),], 3333, type = "random")
 #transform into correct projection
-Sample_x_2018 <- spTransform(Sample_x_2018, CRSobj = area@proj4string@projargs)
-
+Sample_older_2018 <- spTransform(Sample_older_2018, CRSobj = area@proj4string@projargs)
+sample_new_2018 <- spTransform(Sample_new_2018, CRSobj = area@proj4string@projargs)
 #create healthy sample polygon
 not_BB_poly <- gDifference(area, observations) # cutting infestation area from hgealthy area
 not_BB_poly <- as(not_BB_poly, "SpatialPolygonsDataFrame") # convert to spdf
 #writeOGR(not_BB_poly, dsn= paste0(getwd(), "/input/observations"), driver= "ESRI Shapefile", layer = "cuttet_area_x_2018") # writing out
 
 #Sample healthy observation
-Sample_x_2018_healthy <- spsample(not_BB_poly, 5000, type = "random")
-Sample_x_2018_healthy <- spTransform(Sample_x_2018_healthy, CRSobj = area@proj4string@projargs)
+Sample_healthy_2018 <- spsample(not_BB_poly, 3333, type = "random")
+Sample_healthy_2018 <- spTransform(Sample_healthy_2018, CRSobj = area@proj4string@projargs)
 
 # convert to spdf
-Sample_x_2018_healthy <- as(Sample_x_2018_healthy, "SpatialPointsDataFrame")
-Sample_x_2018 <- as(Sample_x_2018, "SpatialPointsDataframe")
-
+Sample_healthy_2018 <- as(Sample_healthy_2018, "SpatialPointsDataFrame")
+Sample_older_2018 <- as(Sample_older_2018, "SpatialPointsDataframe")
+sample_new_2018 <- as(Sample_new_2018, "SpatialPointsDataframe")
 #create healthy observation dataframe
-df <- data.frame(1:5000)
+df <- data.frame(1:3333)
 colnames(df) <- "observations"
 df$observations <- 0 # no bark beetle attack
-df <- cbind(df,Sample_x_2018_healthy@coords)
+df <- cbind(df,Sample_healthy_2018@coords)
 
-#create infested observation dataframe
-df_not_healthy <- data.frame(1:5000)
-colnames(df_not_healthy) <- "observations"
-df_not_healthy$observations <- 1 # bark beetle attack
-df_not_healthy <- cbind(df_not_healthy, Sample_x_2018@coords)
+#create infested observation dataframe before 2018
+df_old_2018 <- data.frame(1:3333)
+colnames(df_old_2018) <- "observations"
+df_old_2018$observations <- 1 # bark beetle attack
+df_old_2018 <- cbind(df_old_2018, Sample_older_2018@coords)
+
+#create infested observation dataframe new 2018
+df_new_2018 <- data.frame(1:3333)
+colnames(df_new_2018) <- "observations"
+df_new_2018$observations <- 2 # bark beetle attack
+df_new_2018 <- cbind(df_new_2018, Sample_new_2018@coords)
 
 #create observation data frame
-obs <- rbind(df, df_not_healthy)
-
+obs <- rbind(df, df_old_2018)
+obs <- rbind(obs, df_new_2018)
 #write out observation
-write.csv(obs, file=paste0(getwd(), "/input/observations/new/barkbeetle_obs_x_to_2018_2class.csv"))
+write.csv(obs, file=paste0(getwd(), "/input/observations/new/barkbeetle_obs_x_to_2018_3class.csv"))

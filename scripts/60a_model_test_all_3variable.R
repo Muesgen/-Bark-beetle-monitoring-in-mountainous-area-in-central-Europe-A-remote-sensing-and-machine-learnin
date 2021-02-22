@@ -137,7 +137,7 @@ data3 <- read.csv(paste0(getwd(),"/modelinput2/paramet_data3.csv"), sep = ";")
 colnames(data3)[(ncol(data3)-35):ncol(data3)] <- substring(names(climate_preproc),15, nchar(names(climate_preproc)))
 data <-  cbind(data1,data2)
 data <- cbind(data,data3)
-obs <- read.csv2(paste0(getwd(),"/input/observations/Befall_gesamt/barkbeetle_obs_2018_3class.csv"), sep=",")
+obs <- read.csv("E:/Marvin/BB_rf/input/observations/new/barkbeetle_obs_x_to_2018_3class.csv")
 #defining coordinates, Lat = Y Long = X
 obs[,3] <- as.numeric(as.character(obs[,3]))
 obs[,4] <- as.numeric(as.character(obs[,4]))
@@ -160,8 +160,8 @@ if (is.null(projObs) == TRUE){
                                  proj4string = CRS(dummy@proj4string@projargs))
   head(spdf)
 }
-spdf <- SpatialPointsDataFrame(coords = xy, data = obs[,c1],
-                               proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
+spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
+                               proj4string = CRS("+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs"))
 
 dem<- raster::raster(paste0(getwd(),"/input/observations/dem/dem_10.tif"))
 library(red)
@@ -173,8 +173,8 @@ km <- kmeans(df, centers = 4) # clustering points into locations for spacevar
 #plot(obs$x.coord, obs$y.coord, col = km$cluster, pch = 20) # plot cluster
 obs <- cbind(obs,km$cluster) #add spacevar column
 colnames(obs)[ncol(obs)] <- "cluster" # rename spacevar column
-traindat <- cbind(obs,data) #create traindata
-
+cluster<- cbind(obs,data) #create traindata
+cluster<- obs[,5]
 #Split data 70/30; save 30% for prediction and validation
 print(paste0("Start model: ", Sys.time()))
 set.seed(1993)

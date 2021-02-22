@@ -4,7 +4,8 @@
 # Author: Marvin M??sgen
 # Description: This Script remove cloud values fro
 #---
- 
+rasterOptions(progress = 'text',timer=TRUE)
+
 ######Setting parameters ###############################
 observations <- "o_total.csv" # name of observation data
 setwd("E:/Marvin/BB_rf") # setting working directory
@@ -55,7 +56,7 @@ rs_list<- lapply(temp, stack)
 #rs <- rs_list[[1]]
 
 #read in the observations
-obs <-read.csv("E:/Marvin/BB_rf/input/observations/new/barkbeetle_obs_x_to_2018_2class.csv")
+obs <-read.csv("E:/Marvin/BB_rf/input/observations/new/barkbeetle_obs_x_to_2018_3class.csv")
 print("observations loaded")
 head(obs)
 #obs[,5:ncol(obs)] <- NULL
@@ -108,7 +109,7 @@ for (i in 1:length(rs_list)){
   obs <- cbind(obs,df)
 }
 
-write.csv(obs,file = paste0("E:/Marvin/BB_rf/output/new/Sen_2_Extracted_data",start,end,"2.csv"))
+write.csv(obs,file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_2_Extracted_data",start,end,"3.csv"))
 
 ####### Extracting clouds ######
 
@@ -163,12 +164,12 @@ for (i in 1:nlayers(rs_clouds)){
   obs <- cbind(obs,df)
 }
 
-write.csv(obs, paste0("E:/Marvin/BB_rf/output/new/_Extracted_SCL",start,end,"2.csv"))
+write.csv(obs, paste0("E:/Marvin/BB_rf/output/new/3mod/_Extracted_SCL",start,end,"3.csv"))
 
 ####### Remove Clouds and cloud shadows from extracted data #######
 
-scl <- read.csv(paste0("E:/Marvin/BB_rf/output/new/_Extracted_SCL",start,end,"2.csv"))
-data <- read.csv(paste0("E:/Marvin/BB_rf/output/new/Sen_2_Extracted_data2018-04-012018-09-302.csv")) 
+scl <- read.csv(paste0("E:/Marvin/BB_rf/output/new/3mod/_Extracted_SCL",start,end,"3.csv"))
+data <- read.csv(paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_2_Extracted_data2018-04-012018-09-303.csv")) 
 
 for (i in 1:length(cloud_dates)){
   print(paste0("Succesfully removed cloud pixels ",cloud_dates[i]))
@@ -180,7 +181,7 @@ for (i in 1:length(cloud_dates)){
   data[rows,str_detect(colnames(data), cloud_dates[i]) == TRUE] <- NA
 }
 
-write.csv(data, paste0("E:/Marvin/BB_rf/output/new/_Extracted_data_no_clouds",start,end,"2.csv"))
+write.csv(data, paste0("E:/Marvin/BB_rf/output/new/3mod/_Extracted_data_no_clouds",start,end,"3.csv"))
 
 ####### Statistics #########
 #calculating statistics from the observation points and write it to data frame
@@ -198,10 +199,10 @@ pblapply(veg_names,function(x){
   index1 <- which(obs_stats == Inf | obs_stats == -Inf | is.na(obs_stats)) # list index of wrong data
   obs_stats[index1,] <- NA
   is.na(obs_stats) <- do.call(cbind,lapply(obs_stats, is.infinite))
-  write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/new/observation_stats_without_cloudvalues",start,end,x,"2.csv"))
+  write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_2/observation_stats_without_cloudvalues",start,end,x,"3.csv"))
   #calculating statistics for every vegetation indix and month
   lapply(month, function(y){
-    month_stats <- as.data.frame(matrix(ncol=7,nrow= NROW(obs)))
+    month_stats <- as.data.frame(matrix(ncol=4,nrow= NROW(obs)))
     headers <-c(paste0(x,y,"_means"), paste0(x,y,"_max"), paste0(x,y,"_min"), paste0(x,y,"_sd"))
     colnames(month_stats) <- headers
     obs_IM <- obs_I[,grepl(y, colnames(obs_I))]
@@ -212,7 +213,7 @@ pblapply(veg_names,function(x){
     index2 <- which(obs_stats == Inf | obs_stats == -Inf | is.na(obs_stats)) #list index if wrong data
     month_stats[index2,] <- NA
     is.na(month_stats) <- do.call(cbind,lapply(month_stats, is.infinite))
-    write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/new/observation_stats_without_cloudvalues",x,y,"2.csv"))
+    write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_2/observation_stats_without_cloudvalues",x,y,"3.csv"))
     })
   })
 

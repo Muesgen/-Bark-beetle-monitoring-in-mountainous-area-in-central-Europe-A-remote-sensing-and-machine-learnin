@@ -1,7 +1,7 @@
 ############# SKript for extracting Rasters #############
-
+rasterOptions(progress = 'text',timer=TRUE)
 ######Setting parameters#########
-observations <- "barkbeetle_obs_x_to_2018_2class.csv" # name of observation data
+observations <- "barkbeetle_obs_x_to_2018_3class.csv" # name of observation data
 #/Volumes/MarvinLaCie/Marvin/BB_rf/input/observations/Befall_gesamt/barkbeetle_obs_x_to_2018_2class.csv
 setwd("E:/Marvin/BB_rf") # setting working directory
 Input_dir <- "/input" # inpiut directory
@@ -44,38 +44,38 @@ print(month)
 rasterOptions(maxmemory = 1e+09)
 
 #reading the rasters
-temp <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*.tif", full.names = TRUE)
-ras_list <- lapply(temp, raster)
+#temp <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*.tif", full.names = TRUE)
+#ras_list <- lapply(temp, raster)
 
 # Define clipping extent and res
-e <- bbox(ras_list[[1]]@extent) # extent
-tr <- c(10.0,10.0) # pixel size
+#e <- bbox(ras_list[[1]]@extent) # extent
+#tr <- c(10.0,10.0) # pixel size
 
-extRas <- ras_list[[1]]
+#extRas <- ras_list[[1]]
 #stacking rasters
-if (lapply(ras_list, function(X){ extRas@extent == X@extent }) == TRUE){
-  print("Extents of Rasters are not equal, extent of rasters will be alligned")
-  #Define clipping extent and res
-  e <- bbox(ras_list[[1]]@extent) # extent
-  tr <- c(10.0,10.0) # pixel size
-  #alignig extent
-  r_list<- pbsapply(temp, function(x){
-    gdalUtils::align_rasters(x,temp[[1]],dstfile = sub('\\.tif', '_ext.tif', x),nThreads = 7)
-  })
+#if (lapply(ras_list, function(X){ extRas@extent == X@extent }) == TRUE){
+#  print("Extents of Rasters are not equal, extent of rasters will be alligned")
+#  #Define clipping extent and res
+#  e <- bbox(ras_list[[1]]@extent) # extent
+#  tr <- c(10.0,10.0) # pixel size
+#  #alignig extent
+#  r_list<- pbsapply(temp, function(x){
+#    gdalUtils::align_rasters(x,temp[[1]],dstfile = sub('\\.tif', '_ext.tif', x),nThreads = 7)
+#  })
   #stackig rasters
   temp2 <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*_ext.tif", full.names = TRUE)
   rs <- stack(temp2)
-}else{
-  print("Extents are equal")
-  rs <- stack(ras_list)
-}
+#}else{
+#  print("Extents are equal")
+#  rs <- stack(ras_list)
+#}
 nlayers(rs)
 
 ###reading the obeservation shape and setting the projection
 
 #read in the observations
 #obs <-read.csv(paste0(getwd(),Input_dir,"/observations/", observations))
-obs <- read.csv("E:/Marvin/BB_rf/input/observations/new/barkbeetle_obs_x_to_2018_2class.csv")
+obs <- read.csv("E:/Marvin/BB_rf/input/observations/new/barkbeetle_obs_x_to_2018_3class.csv")
 print("observations loaded")
 head(obs)
 #obs[,5:ncol(obs)] <- NULL
@@ -86,27 +86,27 @@ obs[,ycoordcolnum] <- as.numeric(obs[,ycoordcolnum])
 xy <- obs[,c(xcoordcolnum,ycoordcolnum)]
 xy <-as.list(xy)
 
-if (is.null(projObs) == TRUE){
-  #creating a spatioalpointdataframe
-  spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
-                                 proj4string = CRS(rs[[1]]@crs@projargs))
-  print("Spatialdataframe is created")
-  head(spdf)
-  print("POSSIBLE ERROR: Please check the outwritten DataFrame, could be with NAs")
-  Print("SOlution: check your coordinates in the observation DF and give the correct Projection to the projOBS argument")
-} else{
-  #creating a spatioalpointdataframe
+#if (is.null(projObs) == TRUE){
+#  #creating a spatioalpointdataframe
+#  spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
+#                                 proj4string = CRS(rs[[1]]@crs@projargs))
+#  print("Spatialdataframe is created")
+#  head(spdf)
+#  print("POSSIBLE ERROR: Please check the outwritten DataFrame, could be with NAs")
+#  Print("SOlution: check your coordinates in the observation DF and give the correct Projection to the projOBS argument")
+#} else{
+#  #creating a spatioalpointdataframe
   spdf <- SpatialPointsDataFrame(coords = xy, data = obs,
                                  proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs"))
-  print("Spatialdataframe is created")
-  head(spdf)
-}
+#  print("Spatialdataframe is created")
+#  head(spdf)
+#}
 #transforming into correct projection
 dummy <- readOGR("E:/Marvin/NP_Boundary.shp")
 dummy@proj4string@projargs
 
-temp2 <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*ext.tif", full.names = TRUE)
-temp
+#temp2 <- list.files(paste0(getwd(), Input_dir, Sat_dir, sub_dir,"/"), pattern = "*ext.tif", full.names = TRUE)
+#temp
 rs <- stack(temp2)
 #r_crs<- rs[[1]]@crs
 #spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
@@ -140,10 +140,8 @@ obs <- cbind(obs,df)
 
 
 #write.csv(obs,file = paste0(getwd(),Output_dir,sub_dir, "/_Extracted_data_2",start,end,".csv"))
-write.csv(obs,file = paste0("E:/Marvin/BB_rf/output/new/Sen_1_2/Ascending/_Extracted_data_2",start,end,".csv"))
-"E:\Marvin\BB_rf\output\Sen1_3"
-
-terra::writeRaster(rs, paste0("E:/Marvin/BB_rf/output/new/Sen_1_2/Ascending/_Sen1_Ascending_Stack2.tif"), overwrite=TRUE)
+write.csv(obs,file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_1_2/Ascending/_Extracted_data_3",start,end,".csv"))
+#terra::writeRaster(rs, paste0("E:/Marvin/BB_rf/output/new/Sen_1_2/Descending/_Sen1_Ascending_Stack2.tif"), overwrite=TRUE)
 
 ####### Statistics #########
 
@@ -158,7 +156,7 @@ pblapply(pols,function(x){
   obs_stats[,2] <- apply(obs_I[,1:ncol(obs_I)],1, max, na.rm = TRUE) #maximum
   obs_stats[,3] <- apply(obs_I[,1:ncol(obs_I)],1, min, na.rm = TRUE) # min
   obs_stats[,4] <- apply(obs_I[,1:ncol(obs_I)],1, sd, na.rm=TRUE) # standard deviaton
-  write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/new/Sen_1_2/Ascending/observation_stats",start,end,x,"2.csv"))
+  write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_1_2/Ascending/observation_stats",start,end,x,"3.csv"))
   #write.csv(obs_stats, file = paste0("E:/Marvin/BB_rf/output/Sen1_3/observation_stats",start,end,x,"3.csv"))
   lapply(month, function(y){
     month_stats <- as.data.frame(matrix(ncol=4,nrow= NROW(obs)))
@@ -169,7 +167,7 @@ pblapply(pols,function(x){
     month_stats[,2] <- apply(obs_IM[,1:ncol(obs_IM)],1, max, na.rm = TRUE) #maximum
     month_stats[,3] <- apply(obs_IM[,1:ncol(obs_IM)],1, min, na.rm = TRUE) # min
     month_stats[,4] <- apply(obs_IM[,1:ncol(obs_IM)],1, sd, na.rm=TRUE) # standard deviaton
-    write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/new/Sen_1_2/Ascending/","observation_stats",x,y,"2.csv"))
+    write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/new/3mod/Sen_1_2/Ascending/","observation_stats",x,y,"3.csv"))
     #write.csv(month_stats, file = paste0("E:/Marvin/BB_rf/output/Sen1_3/observation_stats",x,y,"3.csv"))
     
     })

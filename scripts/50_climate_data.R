@@ -6,7 +6,7 @@
 #---
 getwd()
 #Setting Paths
-setwd("/media/mohammad/MarvinLaCie/Marvin/BB_rf") # setting working directory
+setwd("E:/Marvin/BB_rf") # setting working directory
 Input_dir <- "/input/observations/climate_data/" # inpiut directory
 funfold= paste0(getwd(),"/functions") # function folder directory
 ext <- "/observations/NP_Boundary.shp" # File in Input_dir: Polygon Shapefile with the extent of the area of Interest
