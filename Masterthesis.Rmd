@@ -1,31 +1,293 @@
 ---
-title: "Masterthesis"
-author: "Marvin Muesgen"
+title: "Master thesis"
+subtitle: "Mapping Bark Beetle Infestations - A Remote Sensing and Machine Learning Approach"
+author: "Marvin Müsgen"
+institute: "Physische Geographie"
+abstract: "Due to increasing extreme storm events and rising global air temperature bark beetle infestations occur more frequently. The European bark beetle 'Ips Typographus' causes heavy damages for forest industry in Europe. It is important to find monitoring methods which are able to detect infestations at an early stage to reduce the dimensions of damages generated from the bark beetle. However the drivers of bark beetle outbreaks are not yet fully understood. Important influence factors are climate parameters. The effect of different infestation stages should be noticeable in the changing chlorophyll and water content. Therefore, in this study, bark beetle infestations especially at early stage are mapped. It is expected that infestations occur at climate and topographic exposed locations. Also changing values in different vegetation indices and SAR backscatter are expected during the different infestation stages. In this study an attempt is made to classify bark beetle infestations. Thereby the trees are classified into healthy and infested trees and additionally into healthy, early infestation stage and later infestation stage. Ground truth data were obtained from different airborne laser scanning flights from different years through an alghorithm provided by the Black Forest Nationalpark. From Sentinel-1, Sentinel-2, climate data and topographic data an optimal predictor set was searched. Random Forest with spatial cross validation was used for classification. The classification between healthy and infested trees reaches an overall accuracy of 85 % and the classification between healthy, infested at early stage and infested at later stage  achieves 73 % overall accuracy. Most suitable predictor variables are chlorophyll content related vegetation indices. Climate indices create a good basis for predictions, whereas Sentinel-1 data seems to be less important. The study shows the potential of monthly composites of Vegetation Indices generated from Sentinel-2 data for mapping bark beetle infestations at early stage."
 geometry: margin=2cm
+linestretch: 1.5
+fontsize: 12pt
 output:
   bookdown::pdf_document2: default
   pdf_document:
+    includes:
+      before_body: "C:/Users/mmues/Desktop/Masterarbeit/titlepage.tex"
     number_sections: true
   html_document:
     df_print: paged
     number_sections: true
-bibliography: D:/Marvin/BB_rf/doc/literature/used_in_thesis/Bark-Beetle-Masterthesis.bib
+bibliography: C:/Users/mmues/Desktop/Masterarbeit/literatur/Bark-Beetle-Masterthesis.bib
+csl: C:/Users/mmues/Downloads/elsevier-harvard-with-titles-bb_rf1.csl
 ---
 
-blah bla -@Abdullah2019
 
-Hallo mein name ist hase. ich schreibe hier ein schnelles flitze buch über remote sensing. Remote Sensing habe ich vertieft in meinem Master der physischen Geographie an der Universität Marburg. Meine Bachelor habe ich in Aachen and er Rwth Aachen University am Fachbereich 5/4 Geographie absolviert. In meiner beruflich Laufbahn habe ich 5 Wochen bei der Stadt aachen in der Verkehrsplanung gearbeiten und 1 1/2 Jahre am Institut für Gender und Diversity. Währen meines Masters habe ich 3 Praktika absolviert. aBDJHba
+# Introduction
 
-SAR – Sensoren können durch das Rückstreusignal Auskunft über die Waldoberflächenstrukturen geben [@Beaudoin1994]. P- und L- Bänder weisen eine stärkere Rückstreuung  von Ästen und Stämmen auf im Vergleich zu den C – Bändern, die die meiste Energie von Blättern und Nadeln aufnehmen. [@HoTongMinh2014 ,@Brolly2013] Ein multitemporaler Ansatz kann die Signalvariabilität reduzieren[@Rauste2005]
+In the last decades an increase of frequency and intensity of pest induced forest disturbance is observed worldwide. For example the sudden increase of death oaks in North America, the outbreaks of the mountain pine beetle in boreal forest in Canada and the bronze bug infestations on plantations in south africa [@Chen2016]. These global phenomena are related to climate change events [@Lindner2010]. An increase of mean annual temperature and extreme weather events promotes forest diseases (ibid.). Similar to the worldwide observations, bark beetle outbreaks in norway spruce forests in central europe have increased after the extrem storm events Kyrill, Paula and Emma in 2007 and 2008 [@Tomiczek2011]. The activity of bark beetle depends on the air temperature. @Wermelinger2004 determines that bark beetle swarm out begins between April and Mai, when the air temperature reaches 16,5$^{\circ}$C. Whereas @Ohrn2014 have discovered that the fly activity of bark beetle begin after 47 days with a higher air temperature of 5$^{\circ}$C. However various studies forecast an increased risk for forest pests in europe as a result of climate change [@Netherer2010; @Seidl2011a]. These forecasts are confirmed by @Ohrn2014, who have observed an increased bark beetle activity in the second half of the vegetation period, which is induced by a higher number of degree days during climate change.
 
-# The first section 
+Forest changes caused by pest insects having a wide range of impacts on ecosystem services. In addition to the effect on forest products the cabilities of forests, like stocking of carbon, percolating water and supporting biological diversity, are reduced [@Boyd2013]. Finally the dead tree areas force the local climate heating in an extreme dimension [@Hais2008]. These changing effects often lead to a loss of identification with the local nature by locals and trigger political conflicts between different public and political actors, especially in near border areas, like in the Bavarian Forest [@Muller2011]. Equally the different interests of nature conservation and forestry raise the question who is responsible for a general management and shows how important suistanable forest management and monitoring are for the saving of ecosystem services [@Seidl2011]. 
 
-## the second
+The risk of bark beetle infestations on living trees may be reduced by removal of infested trees out of the forest [@Jonsson2011]. This management approach produced large amount of unplanned harvesting with alarming impacts on forestry in Germany [@Meining2009]. A cost-efficient protection is just effective when infested trees will be removed out of the forest before the the larvae of the bark beetles leave the trees [@Krehan2008]. This requires cost and time intensive field survey, where foresters search for indications like rough shavings extruded from the bark  [@Immitzer2014]. Bore dust is one of the indications which is visible at the early stage of an infestatios, the so called green-attack [@Niemann2005]. Other indications are: deacreasing chlorophyll and water content in the leaves, discolouration of leaves during the red-attack and defoliation during the red-attack [@Chen2016]. These different changes in the leaves characteristics open the possibility to monitor the health status of forest with remote sensing techniques (ibid). 
+
+Already during the 1970s decade remote sensing methods were used for mapping forest disturbances induced by insects [@Heller1973]. Many various studies have shown the potential of remote sensing data for detecting the health status of trees, whereby the infestation stages of red-attack and grey-attack easy and green-attack is difficult to detect. [@Roberts2003; @Skakun2003; @Wulder2006a; @Coops2006a]. However, opportunities for forest health monitoring are growing due to the increasing amount of data sets with low acquisition costs through open source strategies and increasing number of platforms [@WOODCOCK2008; @Eitel2011]. Most monitoring approaches have focussed on  optical remote sensing approaches, which are using the light absorption in the visible light and the reflexion of infrared and near infrared to obtain information about the canopy [@Senf2017]. Some approaches have uesed data from radar systems, which emit electromagnetic pulses and extract information from
+the backscattered signal [@Hollaus2019]. 
+
+## Bark Beetle Detection with Optical Sensors
+
+Since optical sensors obtain information in the red and near-infrared spectrum, they are highly promising, because they can detect stress of vegetation in the near infrared when vegetation is already green [@Eitel2011; Zarco-Tejada2007; @Niemann2005]. @Senf2017 have summarised the used optical sensor for the detection of forest insect disturbances. Only 13% of the studies have used optical data with a low spatial resolution, like MODIS. 15% of the studies have used high-resolution imagery, like WorldView-2. Most studies (57%) have used sensors with intermediate resolution (ibid.). Exceedingly few have used yearly time-series for their approaches, most studies have used multiple single-date data (ibid.)].
+
+Special spectral signutares are associated with specific vegetation characteristics (ibid). Several studies have investigated that nitrogen deprivation and reduced chlorophyll content lead to an increase of reflection in the 400-700nm spectral range, whereas water stress and specific leaf area produce changes in the 700-1100nm spectrum [@Gitelson2002; @Jackson2004; @Mahlein2013; @Munoz-Huerta2013; @Wang2015; @Ali2016]. Additonal the red-edge spectrum shows a high sensitivity to stress indication induced from pests, wherefore it is very useable for the early detection of insect attacks [@Ahern1988; @Carter2001; @Eitel2011]. Regarding the identification of bark beetle infestations @Lausch2013 have discovered that the 450-890nm spectral range works best, which shows that the chlorophyll content is especially important for differentiate between healthy and infested spruce trees. In relation to green-attack @Abdullah2018 have figured out that also the SWIR (1370nm) additional to the NIR (730nm) spectral range are useful for  differentiation between green-attack and healthy trees, because of the differences in the nitrogen concentration.
+
+Various studies have investigated the useability of vegetation indices (VIs) for detecting bark beetle infestations. [@Coops2006a] have used high-resolution Imagery from QuickBird and have investigated the useability of the single spectral bands, the NDVI and the RGI, for differentiation between healthy trees and tress in the red-attack infestation stage. The RGI has achieved the best results in a ANOVA test and showed after a classification significant results to the field obtained validation data (ibid.). For an evaluation of bark beetle induced forest damages WorldView-2 Imagery and different VIs (NDVI, SR, EVI, ARVI, CRI, CSc, ARI) are used to detect stress (ibid.). Therefore @Filchev2012 has marked out, that CSc performs better in detecting stressed spruce trees as the VIs. @Havasova2015 have searched for the most sensitive VI for past bark beetle outbreaks using different methods of vegetation differentiation and six Landsat-TM Imagery. Except the NDVI, all other VIs (VCI, MSI, NDMI, DI, DI') have reached comparable Kappa index values and showed a sensitivity to past bark beetle outbreak areas (ibid.). @Abdullah2019c have found out that VIs created from Sentinel-2 imagery show much higher sensitivy (67%) to green-attack areas than VIs created from Landsat-8 (36% sensitivity). The result of a Principal Component Analysis and a Partial Least Sqaure Discriminate Analysis was that water related VIs (SR-SWIR, NDWI, DSWI, LWCI, RDI) derived from both sensors can differentiate between green-attack and healthy trees (ibid.). In addition to them only the red edge indices created from Sentinel-2 are able to differentiate between green-attack and healthy trees. 
+
+The usage of spectral indices enables classification of different stages of bark beetle infestations. @Meddens2013 have reached 91% overall accuracy for a red-attack single-date classification with VIs created from Landsat and 89% overall accuraacy for red-attack multi-date classification, which shows the possibility of optical data for bark beetle infestations classification. Also @Marx2010 have achieved high accuracy in the classification of red infestations using RapidEye data and supervised classification, but have reached no useful accuracy to the identifying of green-attack stage. According to @Marx2010, @Lausch2013 have not achieved an practicable accuracy for forestry, which is able to distinguish between healthy green foliage from foliage with reduced vitality. Three other studies have tried a more overarching approach, to classify all infestation stages. @Immitzer2014 have used WorldView-2 spectral bands to identify healthy, infested but not discoloured, infested and discoloured and dead trees with a Random Forest classifier and logistic regression. All classes have reached an accuracy over 70 % but the overall accuracy was only 76 % (ibid.).
+
+Optical sensors have a big potential for detection changes in forests. Particularly suitable are red-edge and near infrared spectral wavelength, but they have not reached useable results for green-attack infestations stages [@Marx2010; @Lausch2013]. An additional disadvantage is the dependence on weather conditions, because passive sensor systems can not obtain information through cloud and dust [@Wulder2006].
+
+## Bark Beetle Detection with Radar Sensors
+
+Captured data from Synthetic Aperture Radar (SAR) have two big advantages over data obtained from optical sensors. SAR data is not affected by wheather conditions and is sensitive to vegetation structure under the canopy [@Kellndorfer1998; @Dong2009]. Radar based systems send and receive electromagnetic impulses [@Hollaus2019]. Most systems having two polarisations, the vertical which runs vertical to the surface (V) and a horizontal polarisation which runs parallel to the surface (H) (ibid.). Some SAR systems also use crosed polarisation of V and H (ibid.). SAR data can emit in different wavelength, whereby the wavelengths makes the difference how deep the waves penetrate the vegetation [@Quegan2000]. Shorter wavelength like C-Band only penetrates the treecrown, whereas longer wavelength like P-Band or L-Band can penetrate the vegetation completly from tree crown to the soil (ibid.). Because of the strong backscattering properties of electromagnetic energy from water, SAR data is useful for studying vegetation, which is often described as a cloud of water droplets which is held together by dry matter [@Hollaus2019].
+
+In view of the different backscattering behaviours, it is expected that SAR data can be used to identify bark beetle infestations, because infested trees have a lower moisture content than healthy trees [@Reid1961; @Wermelinger2004; @DeJong2000]. An useability of SAR Imagery for identifying differences in the forest structure is shown by @Ruetschi2018. They have classified different tree species with a Random Forest classifier and reached an overall accuracy of 86 % with a 0.73 Kappa (ibid.). One year later @Ruetschi2019 have noticed that mountainous terrain influences the identification of windthrow because of effects like foreshortening, lay-over and shadowing. After terrain flattening they have calculated windthrow index and classified windthrow areas with an accuracy of 0.88 % (ibid.). @Tanase2018 have used ALOS PALSAR data to identify forest changes which are induced by wind or insect disturbances. They have achieved an accuracy of 65-88% for the differentiation between the forest disturbances and healthy forest. But the insect disturbances at early stage only reached an accuracy of 64-74%. Forest structural changes induced by bark beetle attack can be identified by a change of -1.0dB (ibid.).
+
+A combination of optical and SAR data will be an important focus in remote sensing [@Xia2010; @Laurin2018]. @Ortiz2013 have combined RapidEye optical data and TerraSar-X data to detect bark beetle green attack in the soutwest of Germany. The object based classification between healthy and infested trees was done by a Random Forest classifcation with an overall accuracy of 95,1 % and a Kappa of 0,43 (ibid.). An integration of other gridded parameters besides satellite data could be useful for achieving better results (ibid.). For example, an investigation of infestation risk with optical and topographical data has observed that the topographical parameters contributed significantly more to the model's predictive power than the optical spectral channels. Wetness, slope and irradiation were very helpful in this regard [@Hais2016]. @Chinellato2014 discovered in a field observation that the altitude itself has no impact on bark beetle outbreaks. Additional climate parameters like Windspeed during storm events, air temperature as well as soil depth and soil skeleton can improve forecasts of bark beetle outbreaks [@Jonsson2011; @Jonsson2012; @Netherer2018; @Kazda1998].
+
+## Study Goals
+
+In this study, the suitability of the combination of SAR Sentinel-1 C Band, optical Sentinel-2, topographic and climate data is investigated for the detection of bark beetle outbreaks in the Black Forest National Park in Germany. In a first scenario, infested and healthy trees are classified. In a second scenario, infested trees from previous years (late stage), infested trees from the current vegetation period (early stage) and healthy trees are classified. The results of the Random Forest classification are tested for their suitability using statistical parameters. Furthermore, the optimal combination of variables for the detection of bark beetle infestations is searched by using a Forward Feature Selection. It is expected that SAR Sentinel-1 data will have a significantly higher proportion in the model explanation than optical Sentinel-2 data due to their independence of weather conditions and sensitivity to vegetation structure features. As a basis for the model, topographic and climate data are expected to have a high contribution to the model explanation, from which the model will use the information of satellite data to make a decision between infested and vulnerable trees. In addition the impact of the terrain will be investigated. In particular the study analyses if a combination of SAR data with different orbit directions can be combined after terrain flattening and for which topography the ascending or descending orbit direction is suitable. It is expected that despite terrain flattening the backscatter values of the two orbits per pixel differ and will not be comparable. It is also expected that the most suitable orbit direction is the one that most closely corresponds to the main orientation of the slopes, because it is assumed that shadow effects having a greater impact on backscatter values than foreshortening.
+
+# Data and Methods 
+
+This study followed a workflow which can be subdivided in three main steps: Data acquisition in blue, data processing in green and the modeling in yellow (Figure 1). The whole workflow was executed in R version 3.6.3, except of Sentinel-1 preprocesseing which was excecuted in Python, and is described in this chapter [@R; @Python].
+
+
+```{r, fig.align='center', fig.cap='Workflow. Data acquisition in blue, data processing in green and modeling in yellow', out.height="40%", out.width="100%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/Worklflow.png')
+```
+
+## Study Area
+
+The Black Forest National Park in south-west Germany was selected as the study area for the research (Figure 2). In 2014, the area of more than 10,000 hectares was designated as a national park and is divided into a northern and southern part, each of them is sperated into a core, development and management zone [@Foerschler2015]. The elevation ranges from 500 m and 1150 m. Due to the high difference in altitude the precipitation and air temperature differs within the nationalpark [@Sonnemann2017]. The annual precipitation is approxiametly 2100 mm and the yearly average air temperature is around 6$^{\circ}$C [@Sonnemann2017]. 96 % of the national park area is forested from which 70 % of all trees are Norway spruce (Picea abies) (ibid.). In total the amount of conifers in the forest area is about 92 % [@Sonnemann2017]. A bedrock of granite and gneiss and the overlying red sandstone from 800 m above sea level characterise the geological conditions of the region and weather into often very acidic and nutrient-poor soils (ibid.).  
+
+```{r, fig.align='center', fig.cap='Study Area. Black Forest Nationalpark in the south-west of Germany', out.height="40%", out.width="100%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/studyarea.png')
+```
+
+
+## Data
+
+Infestation polygons were used as response data, which were extracted by algorithm from digital aerial orthofotos and handsight visually checked by an expert [@FVA2019]. When it was necessary the data was corrected by the expert. The data was obtained approxiametly once a year. Sometimes the capture date varies from time to time (ibid.). That's why the infestation date is provided in years. It was provided by the Schwarzwald Nationalpark and the Landesforstverwaltung Baden-Württemberg (LFV BW) represented by the Forstliche Versuchs- und Forschungsanstalt Baden-Württemberg (FVA). The data included bark beetle infestations from 2014 to 2019 [@FVA2019].
+
+Sentinel-1 SAR, Sentinel-2, climate data and topgraphic data were used as predictor data. 114 GRD products with dual polarisation (VV + VH) from Sentinel-1A and Sentinel-1B, recorded between 01.04.2018 an 30.09.2018, were downloaded from the Copernicus Open Acces Hub [@ESA2018]. Also 54 L2A products from Sentinel-2A and Sentinel-2B, captured between 01.04.2018 and 30.09.2018, were downloaded from the Copernicus Open Acces Hub [@ESA2018a]. As a base for the topographic indices a digital elevation model from Copernicus Land Monitoring Service with a spatial resolution of 25m x 25m was downloaded [@CLMS2019]. Climate data for the vegetation period 01.04.2018 to 30.09.2018 were downloaded from DWD Climate Data Center (CDC). The following climate parameters were downloaded:
+
+* gridded monthy mean air temperature [@Wetterdienst]
+* gridded monthly drought index [@Wetterdiensta].
+* gridded monthly real evapotranspiration [@Wetterdienstf].
+* gridded monthly precipitation [@Wetterdienstc].
+* gridded monthly soil moist [@Wetterdienstd].
+* gridded monthly sunshine duration [@Wetterdienste].
+* hourly windspeed and direction [@Wetterdienstw].
+
+An overview about the us data after preprocessing is given in Figure 3.
+
+## Preprocessing
+
+Polygons were removed from the infested polygons where it is confirmed that the infested trees were not longer standing. Trees were also removed where it was not clear which tree species they were. This was done for polygons in the core and development zone. Then two classes were created for scenario 1. The first class consists of healthy trees. Randomly 5000 sample points were created, which are inside the national park but outside the infestation polygons within the forest area. The second class consists of 5000 randomly created sample points located within the filtered infestation polygons, which were detected in 2018 at the latest. The second scenario contains 3 classes. The first class consists of healthy trees. For this, 3333 sample points were randomly created that were located within the national park but outside the infestation polygons within the forest area. The second class consists of 3333 randomly generated sample points located within the filtered infestation polygons detected in 2018. Finally, the third class consists of 3333 randomly generated sample points that were located within the filtered infestation polygons, just like the points of the second class, but were detected in 2017 or earlier.
+
+```{r, fig.align='center', fig.cap='Used input variables. Statistic means that the variable is used with calculated maximum, mean, minimum and standard deviation', out.height="90%", out.width="100%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/Attachement1.png')
+```
+
+
+The use of Sentinel-1 SAR data requires several preprocessing steps in advance to minimise interference. For preprocessing the Sentinel-1 Toolbox (S1TBX) is used. A total of 7 steps were applied in the following order, most of them were similar to the preprocessing workflow of [@Filipponi2019]: 
+
+* Applying orbit file [@SNAP].
+* Thermal noise removal [@SNAP].
+* Radiometric calibration [@SNAP].
+* Speckle filtering [@SNAP].
+* Terrain correction [@SNAP].
+* Terrain flattening [@SNAP].
+* Converting linear to/from db [@SNAP].
+
+During preprocessing standard values are chosen except for terrain flattening and terrain correction, for which the SRTM 1Sec HGT was used instead of SRTM 3Sec due to its higher spatial resolution. This is necessary because SAR Data are captured in a varyieng viewing angle, which leads to distortion related to the geometry [@Filipponi2019]. The terrain correction fixes geometric distortions caused by mountainous areas, such as foreshortening and shadows. By using a digital terrain model the corrections are made for each pixel. Terrain flattening normalizes the effects of slop, which should make the combination of different orbit directions easier [@Karbou2021]. Terrain correction only effects terrain variations in position. For analyzing classification of land covers it is necessaary to correct the brightness of the radar return induced by the terrain [@Small2011]. Speckle filtering was apllied to reduce the effect of random appearence of interference caused by returning waves [@Lee2009]. The radiometric calibration provided imagery where the pixel values can be directly related to the radar backscatter of the scene and makes different images comparable [@Schwerdt2008]. Before the accurate satellite position is applied and the thermal noise especcially appearing in the cross-polarization is removed [@Filipponi2019]. After converting to dB for each month and the whole period per polarisation, maximum, mean, minimum and standard deviation were calculated. The results of preprocessing are 54 variables of polarisation, time and statistic for the Sentinel-1 data (Figure 3). 
+
+In the following 12 vegetation indices were calculated from the Sentinel-2 L2A data. The indices were selected according to their efficiency in detecting vegetation species, water stress and chlorophyll content:
+
+* CIrededge [@RaymondHunt2011]
+* DSWI4 [@Apan2003]
+* ExGR [@Meyer2008] 
+* GLI [@RaymondHunt2011]
+* GNDVI [@RaymondHunt2011]
+* MCARI [@RaymondHunt2011]
+* MSI [@Heiskanen2006]
+* MSR670 [@Chen1996]
+* MVI [@Thenkabail2002]
+* NGRDI [@RaymondHunt2011]
+* NDRE [@RaymondHunt2011]
+* NDVI [@RaymondHunt2011]
+
+Afterwards a scene classification map (SCL) was extracted from each Sentinel-2 product and the pixels which contain clouds were setted to NA in the VIs rasters. Then equally to Sentinel-1 preprocessing raster statistics are calculated for each month, the whole period and per VI. At the end 28 Variables are created for each VI.
+
+Climate data is processed according to the recommendations of the DWD (Figure 3). The preprocessing of the topographic indices was performed in R through the interface of SAGA environment [@Conrad2015]. As basis for the topographic indices the DEM 25m x 25m [@CLMS2019] is chosen and the following indices are calculated: 
+
+* Aspect [@Zevenbergen1987]
+* Altitude  [@CLMS2019]
+* Catchment area [@Quinn1991]
+* Diffuse insolation [@Bohner2009]
+* Direct insolation [@Bohner2009]
+* Sky View Factor [@Bohner2009]
+* Slope [@Zevenbergen1987]
+* Topographic Position Index [@Guisan1999]
+* Topographic Wetness Index [@Bohner2006]
+* Wind effect [@Bohner2009]
+
+DEM, wind direction and wind speed were used to calculate the wind effect as grid for each month and the whole period (Figure 3). In the end all variables which did not have a spatial resolution of 10 x 10 m were resampled. Therefore for spectral and radar data the Nearest Neighbor Method was used and for topographic and climate paramter Billiniar Method were used. After all preprocessing steps were completed, the values for all 10000 sample points were extracted from the grids. At the end 16 topographic Input parameter and 42 climate indices are created.
+
+##Modelling
+
+Random Forest was selected as classification method, because it can handle with non linear relations in the data [@Breiman2001]. Also @Ludwig2019 have shown that Random Forest works well with combined Sentinel-1 and Sentinel-2 data. The variable selection and validation method plays a key role in spatial machine learning approaches [@Meyer2018]. To minimise the risk of spatial autocorrelation, the data points were divided into training and test dataset in a ratio of 30 to 70. This led to a complete independece between the training and test locations [@Ludwig2019]. Forward Feature Selection (FFS) was chosen to determine which predictor variables were most suitable to make spatial predictions about bark beetle infestations. The algorithm trained models with all possible two-variable combinations and evaluated their performance with a 4-fold cross validation in spatially unknown locations [@Meyer2018; @Meyer2019; @Ludwig2019]. Therefore the data was split into 4-folds using their slope orientation derived from @CLMS2019 (north, east, south, west). That means the performance of each predictor set was the average of accuracy from three spatially indenpendent models (Figure 4) [@Meyer2018; @Ludwig2019].
+
+```{r, fig.align='center', fig.cap='Concept of 4 fold leave location out cross validation, according to , Meyer et al. (2019)', out.height="60%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/Spatial_CV.png')
+```
+
+Then the performance was increased by iterating through every possible two pair variable combination [@Meyer2018]. The best fitting two pair combination was selected and was introduced to all remaining variables [@Ludwig2019]. If the model performance did not increase during an iteration, the alghortihm stopped and gave the variables with the best model performance out [@Meyer2018].
+
+#Results
+
+```{r, fig.align='center', fig.cap='Scenario 1 predicted on the stack. Infested classified (red) and healthy classified (green)', out.height="60%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/predictstack2.png')
+```
+
+```{r, fig.align='center', fig.cap='Scenario 2 predicted on the stack. Infested at later stage (red), infested at early stage (yellow), and healthy (green)', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/predictstack3.png')
+```
+
+From the Fandom Forest algorithm a model was created. The Model of scenario predicted on the predictor stack shows two areas (Figure 5). In red are pixels that are classified as infested. In green are pixels that are classified as healthy. 8151 ha are clasified as healthy and 1907 are classified as infested.
+
+
+The prediction on the stack of the second model is shown in figure 6. 8450 ha in green are classified as healthy, 1271 ha as 
+infested at later stage in red and 336 ha as infested at early stage in yellow
+
+## Forward Feature Selection
+
+```{r, fig.align='center', fig.cap='Variable importance for Scenario 1 (left) and Scenario 2 (right)', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/ffs.png')
+```
+
+
+From the initial 454 predictor variables the FFS chose eleven variables as relevant for modelling bark beetle infestations for Scenario 1. The other variables were evaluated as unimportant or downgrading for the model accuracy, which means, that potentially the variables led to a misinterpretation or the information is already given in the model. The selected variables are: 
+
+* MSR670_max
+* GLI201809_means
+* sunshine_duration_201804
+* air_temperature_mean_201806
+* MSR670201809_sd
+* direct_insolation
+* Wind_effect_201804
+* MVI201805_max
+* VV_asc_means_201805
+* NDRE201804_max
+* MVI2018_05_sd.
+
+Figure 7 shows the predictors and their relative explanatory power for the models. The explanation percentages of the individual predictors were calculated from the model. For scenario 1 MSR670_max over the whole period, GLI_means in September and MVI_max in May are of particulary high importence. It is noticeable that changing climate paramters were also important (direct_insolation over the whole period, sunshine_duration in april and wind_effect in april). It is striking that more optical sensors were chosen than SAR data. Only the mean of ascending VV in May was part of the model. Also striking is, that most of the monthly paramaters were from the first half of the vegetation period, seven paramters from the first half and 2 from the second half (Figure 8). July and August were not selected from the Model and two seasonal paramters were chosen. For the second scenario the FFS also selected eleven predictors: (Figure 7):
+
+* NGRDI201809_means
+* MSR670_sd
+* MVI201805_min
+* GLI_means
+* ExGR201807_min
+* MSR670201809_min
+* MVI201804_min
+* NDRE201807_means
+* CIrededge_sd
+* NDRE201809_sd
+* NGRDI201804_max
+* DSWI201806_sd
+
+The selected recording time ranged over the whole period except of August (Figure 8). The Most variable were chosen seasonal or at the last month of the vegetation period. Overall the FFS selected. The FFS has selected one more day in the second vegetation period than in the first half of the vegetation period (Figure 8). It is striking, that MSR670 was of high importance what is similar to the first scenario. In detail the important MSR670 and MVI were captured at the same time in both scenarios. Also in both scenarios indices related to chlorophyll content using near infrared were of higher importance then water stress related indices.
+
+```{r, fig.align='center', fig.cap='Selected Dates by FFS', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/dates.png')
+```
+
+## Model Metrics and Performance
+
+The final Random Forest model was based on the eleven predictor variables selected by FFS. The 4-fold leave location out cross validation used for model tuning shows for the first scenario a performance of 0.85 overall accuracy and Kappa of 0.70. Therefore the error rate of infested trees was 13.8 % and of healthy trees 15.8 %. The model performance for the second scenario reached an overall accuracy of 0.73 overall accuracy and Kappa of 0.60. Therefore the error rate for the healthy trees is 22,9 %, for the old infestations 34,1 % and for the new infestations 22, 4%. Most of the wrong classified pixels in scenario 2 occur during the differentiation between healthy and older infestation stage and between early and older infestation stage. The differentiation between healthy and trees at early infestations only had error rates between 5 % and 7,2 %.
+
+
+## Effect of Terrain on Backscatter Values
+
+After Preprocessing and terrain flattening the values of the dB backscatter for the ascending and descending orbit direction of Sentinel-1 slightly differed (Figure 9) The ranges of first and third quartile are similar. Likewise, the span values of the minimum and maximum values are similar, except for the outlier. For the VV polarization the statistical values of the VV backscatter were marginally lower for the ascending orbit direction as for the descending direction. Also in the VH polarisation the statistical characteristics differed slighty from between ascending and descending orbit direction. Similar to the whole data the statistical characteristics of VV backscatter values from ascending orbit direction for each slope orientation were slightly lower than from descending orbit direction (Figure 10). Also the values between the different orientations differed marginally, but keep the similarity related to quartiles and range of extreme values. 
+
+```{r, fig.align='center', fig.cap='db backscatter Values of VV (left) and VH (right) polarization after terrain flattening', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics("C:/Users/mmues/Desktop/Masterarbeit/Graphics/terrai_effect_all.png")
+```
+
+```{r, fig.align='center', fig.cap='db backscatter values from VV polarization at different slope orientation after terrain flattening', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics("C:/Users/mmues/Desktop/Masterarbeit/Graphics/Asc_desc_direction.png")
+```
+
+# Discussion
+
+The areas classified for both models are clearly overestimated in terms of infestation. This is due to the fact that predictions had to be made on a cloud-influenced stack, because the monthly composition of standard deviation produced NAs. This is because the standard deviation requires more than one cloud-free day per pixel, as more than one input value is needed. The standard deviation is therefore unsuitable as a statistical value for the method. The characteristic properties of the clouds in the optical range are closer to the infected classes than to the healthy ones, which is why large-scale infestation spots appear in the result. This can be seen well in figure 5. Nevertheless, the coherent relationship between infected trees in early, late and healthy stages shows the suitability of the method.
+
+
+##Model Validation
+
+The explanatory accuracies of the two models enqueue in a series of study results. The model of scenario 2 achieved similar statistics as the fourth class Random Forest model (healthy trees, infested trees not discoloured, infested trees and discoloured, dead trees) trained with WorldView-2 data [@Immitzer2014]. Lower accuracy rates (64-74%) were achieved by @Tanase2018, but they only have included SAR Data to their study. @Ortiz2013 have reached significantly better results using combined optical and SAR data. The  95,1% overall accuracy resulted from the object based classification method, which automatically optimizes model statistics, because while the object were classified, the error rates were decreasing. Wrong classified pixels in one object were not validated, when majority of the classified pixels inside the object was correctly classified (ibid.). With hyperspectral data and a sample strategy which was similar to the sampling strategy of this study @Nasi2015 have reached an overall accuracy of 76 % and Kappa of 0,60 for three classes (healthy, infested, dead) and 90 % overall accuracy with a Kappa of 0,80 for two classes (healthy, dead). The 5 % and 0.10 higher Kappa of their two class model in comparison with the results from this study came from the fact, that dead trees are easy to differentiate from healthy trees. In this study healthy trees were differentiated from infested trees of all classes. Possibly the differentiation between trees with leaves and dead trees without leaves is easier than between two classes with leaves, where both classes proportion have trees with green foliage in their class but with different total proportion. The overall accuracy of their three class model were slightly better than the results in this study, but the good results from @Nasi2015 were influenced by their sampling design. They did not seperate the healthy trees from the trees at early green attack stage, what is the most important for the current research status and most difficult to differentiate. So infested trees were classified correct as healthy but were in real infested (ibid.). This study seperated the healthy from infested trees and reached good results between the two mentioned classes, which is really important for forestry. They achieved the best results on the later infestation stage, at that stage the results of this study show less good results because dead trees were not seperated from late infestation stage. Also higher spatial resolution seems to be more useful for detecting the different classes, because of higher spectral sensitivity [@Nasi2015, @Wulder2005].
+
+Furthermore @Meddens2013 show that single-date classifcation (91 % overall accuracy) achieved better results than multi-date classifcations (89 % overall accuracy) results. But with multi-date approaches the model increases in validity.  @Wulder2005 showed an overall accuracy of 84 % with a 92 % class accuracy of red-attack infestation stage but only 61 % of green-attack infestation stage. Contrary to @Lausch2013 and @Marx2010 who also achieved high accuracy in red-attack infestation stage and low accuracy in green-attack infestation stage, this study was more sensitive to the early stage than to the later infestation stage. Often a random sampling approach described by @Congalton1999 was used in other studies, which should increase their model validity [@Wulder2005; @Waske2009]. This simple random sampling reduced the possible autocorrelation by its randomness (ibid.). However it can not exclude spatial autocorrelation and overfitting. The sampling and model validation method used in this study developed by @Meyer2018 reduces autocorrelation and overfitting to a minimum. This is shown by figure 11. The satellite images vary only slightly in terms of slope orientation, whereby statistical differences can be recognised. For example, the range of minimum and maximum outside extreme values for VV Ascending in April between north and south, as well as for the vegetation index MSR670 between south and west (Figure 11). Very strong differences can be seen in the topographical and climatic parameters, where the quartiles, median and range of extreme values vary greatly depending on the slope orientation (Figure 11). This shows that the leave location out cross validation strategy used is recommendable for satellite imagery but essential when introducing topographic and climatic parameters.
+
+```{r, fig.align='center', fig.cap='Statistical differences between different locations exemplary for each input variable type', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics("C:/Users/mmues/Desktop/Masterarbeit/Graphics/terrain_modelplot.png")
+```
+
+In addition the amount of sample points should usually represent the area proportion of the class to the total study area. Due to the study goal, the importance of the early attack stage the sample size is not representing the area proportion. The classes have the same amount of sample points, because an equal sampling size can be accepted if the underepresented variable is important for the goal or if the class is rarer [@Wulder2005]. Both mentioned facts leaded to lower model statistics but to higher validity, which makes the comparison between different studies difficult.
+
+## Variable Selection
+
+The relevance of the selected variables by the FFS are meaningful for the explanation how bark beetle infested trees can be detected optimal. In total 4 different types of spectral indices were chosen, which cover the whole bandwidth. The GLI is focussing on the visible light and is sensitive to chlorophyll content [@RaymondHunt2011]. MSR670 and NDRE are also sensitive to chlorophyll content and vegetation regarding the red-edge and near infrared [@Abdullah2019c]. Only the MVI is sensitive to water content and tree mortality regarding the mid-infrared [@Woodcock1996]. It is striking that chlorophyll sensitive vegetation indices are more important than water content related indices. The importance of climate and topographic parameters due to bark beetle infestations was expected and also discovered by the FFS. Three of these parameters are directly related to increasing temperature and drought during climate change. Air temperatures, sunshine duration, and direct insolation are varying above the study area affected by their geographical location. In the Bavarian Forest higher temperatures were obtained in clear cutting areas [@Hais2008]. Also these parameters are significant for the start of bark beetles fly activity [@Wermelinger2004, @Ohrn2014]. Furthermore storm events are a trigger for infestations, so it seems logical that the FFS selected the wind effect as an indicator for wind exposed locations [@Tomiczek2011]. It is noticable that the capture dates mostly located at the beginning of the vegetation period, which means, that infestations are easier to detect in the early season of vegetation period. As expected VV polarization was selected as SAR data variable in Scenario 1 because it is sensitive to the vegetation structure. During grey-attack stage the vegetation volume decreases and this behaviour is very sensitive to the VV polarization [@Hollaus2019]. 
+
+Unexpectedly the VH polarization, which is sensitive for water content and should be theoretically sensitive to green-attack, was not selected in the second Scenario. This could be the result of the sampling strategy. The border between infested at early stage and infested at later stage trees were made by date. The capturing date was not monthly, it was made once a year [@FVA2019]. This leads to the effect, that the border between the classes were not perfectly drawn. So it is possible that trees in the early stage sampling points class were actually infested a year ago and therefore assigned to the wrong sampling class. The SAR backscatter values differ between infested and non infested trees by -1.0 dB [@Tanase2018]. The irrelevance of backscatter values for the model explanation could result from the unsharpness of class borders. This leads to lower differences in the backscatter values between infested and non infested tress. An other explanation could be that the information was not relevant for the model, or already included through a water related index. Also NDVI was not selected by the FFS, which shows a correlation to VH backscatter values [@Stendardi2019]. Additionally the effect of outliers (Figure 5 and 6) led to the unimportance of the backscatter values. Also climate and topographic indices were not selected. 
+Two of the classes have similar values, because locations with specific climate conditions which trigger infestations were represented in two of the three classes (Early infestation and later infestation stage). The model tried to seperate infestation at early stage from infestations at later stage and failed by using climate and topographic data. In total eight different VIs from various capture dates were selected. Three of them (CIrededge, GLI, ExGR) from the visible light and three of them (MSR670, NDRE, NGRDI) are related to near-infrared and rededge wavelength and sensitive to chlorophyll content. Only two were selected as water related indices, one of them with less importance (DSWI4, MVI). It can be assumed that changes in chlorophyll content indicate bark beetle infestation better than water stress. This would explain why VH polarisation was not selected because it has good properties for indicating changes in the water content of vegetation. The recording times were significantly later than in scenario 1. An explanation could be that the differentiation between healthy and infested trees at early stage is easier with increased discolouration foliage. An investigation of the method with sharper classes would be interesting.
+
+Inluding other ecological parameters like tree diameter, tree species, or distance to infested trees might increase the model performance but in most cases this data is not open source and therefore not included in this study [@Nasi2015; @Kautz2014]. Other promising parameters which can be achieved from remote sensing data, like tree heights, were not included in the model because the C-Band wavelength is not big enough to penetrate through the canopy to the ground and give information about the height. A possible solution could be the usage of ALOS PALSAR instead of Sentinel-1 which provides data with higher wavelength and penetrate through the canopy [@Quegan2000]. It would be interesting to integrate the canopy surface temperature, which is accessible from Landsat 8-TM and highly sensitive to bark beetle outbreaks [@Abdullah2019d]. In further studies it is recommended to exclude standard deviation statistical values from indices, because this characteristic value needs more than one cloud free pixel per period and produced a lot of NAs in the training data. In Addition it is striking that the standard deviation values did not have wide range like maximum, mean and minimum. This makes it for the classifier useless. For the other parameters the statistical monthly composite shows a promising method to avoid cloud issues.
+
+For both considered scenarios the following parameters are irrelevant or their information is already given through other parameters to the model: 
+
+* GNDVI
+* MCARI
+* NDVI
+* Evapotranspiration
+* Precipitation
+* Soil moisture
+* Aspect
+* Altitude
+* Catchment area
+* Diffuse insolation
+* Sky View Factor
+* TPI
+* TWI
+* VH Backscatter.
+
+Indices related to their topographic position are included in the wind effect also climate indices related to solar radiation. Probably their information is already given in the model through the selected parameters. In contrast parameters related to wetness and water availability seems to be less important for remote sensing and GIS approaches in the field of bark beetle infestation mapping.
+
+## Terrain Effect in Mountainous Area on SAR Backscatter Values
+
+As expected the SAR dB backscatter values differed between the ascending and descending orbit direction of the satellites. The difference between the orbits was minimal and seems to be constant. Regarding the different slope orientations inside the study area the difference between the values is constant regardless of the orientation. After terrain flattening the effect of foreshortening or shadowing is not visible, because the backscatter values of the descending orbit direction are minimal higher at every slope orientation. That shows, that the differences between the different orbit directions does not result from a terrain influence. This demonstrates the usefulness for land cover classifications. By reason of the good preprocessing results and the low importance for the two scenarios, it can not be said which orbit direction is more suitable. In fact they only showed a few differences, so it is suggested that orbit directions do not influence the results of land cover classifications after terrain flattening in mountainous areas. However, terrain flattening leads to an loss of information, when the angle sigma is converted to beta, which could influence the importance for the models [@Karbou2021]. In the future it would be interesting to investigate if it is possible to combine SAR data from ascending and descending tracks by a constant conversion factor. This should be possible because of the uninfluenceability to the topography.
+
+# Conclusion
+
+The Sentinel mission in combination with open source topographic and climate data allows cost efficient bark beetle infestation mapping. A fine sample strategy with well defined class borders and a spatially validation strategy are necessary for machine-learning approaches in the field of bark beetle infestation mapping. The study shows the potential of chlorophyll related vegetation indices calculated from Sentinel-2 L2A images as well as climate and topographic indices as a good predictor variable set. Chlorophyll related vegetation indices are more sensitive to bark beetle infestations than water related indices. In total MSR670, MVI, GLI, NGRDI and NDRE are most important for bark beetle infestation classifications. Less important are CIrededge, DSWI4, ExGR. Irrelevant are the GNDVI, MCARI and the NDVI. Also irrelevant are water related climate and topographic indices. The sampling strategy influences the variable selection enormously. Sentinel-1 SAR data is useful in mountainous area independently from orbit direction and slope orientation. But Sentinel-1 SAR data is not sensitive enough for mapping bark beetle infestations at different stages. Therefore monthly compositions should be considered as a solution approach for mapping bark beetle infestations in cloudy regions, because optical data is more sensitive to bark beetle infestations than SAR data. The resulting model shows a high potential for mapping bark beetle infestations and also differentiation between early infested trees and healthy trees. The method seems to be promising for detecting bark beetle infestations at early stage and could be useful for a risk assesment. Instead of a classification, a probability calculation could be used to present an acceptable monitoring approach. A risk level could be given based on the probability of infestation. It is recommended to apply this method with more sharp deliniated classes. Machine learning approaches have a great potential for mapping infestations and should be investigated further with different sampling strategies.
 
 \newpage
 
-# The second section
 
-#references
+# References
 
-#Attachement
+<div id="refs"></div>
+
+# Appendix
+
+
