@@ -106,7 +106,8 @@ r_crs<- rs_list[[1]]@crs
 spdf <- sp::spTransform(spdf, CRS(proj4string(r_crs)))
 
 #creating correct rasternames
-singleString <- paste(readLines(paste0(getwd(),"/output/Sen2/used_indices.txt")), collapse=" ")
+singleString <- paste(readLines(paste0(getwd(),"/output/Sen2/used_indices.txt")
+                                ), collapse=" ")
 veg_names <- unlist(strsplit(singleString, " "))
 
 #initialize progressbar

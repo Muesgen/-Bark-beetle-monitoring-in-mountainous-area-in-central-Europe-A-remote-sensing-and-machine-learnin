@@ -24,7 +24,6 @@ csl: C:/Users/mmues/Downloads/elsevier-harvard-with-titles-bb_rf1.csl
 
 ---
 
-
 # Introduction
 
 In the last decades an increase of frequency and intensity of pest induced forest disturbance is observed worldwide. For example the sudden increase of death oaks in North America, the outbreaks of the mountain pine beetle in boreal forest in Canada and the bronze bug infestations on plantations in south africa [@Chen2016]. These global phenomena are related to climate change events [@Lindner2010]. An increase of mean annual temperature and extreme weather events promotes forest diseases (ibid.). Similar to the worldwide observations, bark beetle outbreaks in norway spruce forests in central europe have increased after the extrem storm events Kyrill, Paula and Emma in 2007 and 2008 [@Tomiczek2011]. The activity of bark beetle depends on the air temperature. @Wermelinger2004 determines that bark beetle swarm out begins between April and Mai, when the air temperature reaches 16,5$^{\circ}$C. Whereas @Ohrn2014 have discovered that the fly activity of bark beetle begins after 47 days with a higher air temperature of 5$^{\circ}$C. However various studies forecast an increased risk for forest pests in europe as a result of climate change [@Netherer2010; @Seidl2011a]. These forecasts are confirmed by @Ohrn2014, who have observed an increased bark beetle activity in the second half of the vegetation period, which is further induced by climate change and increasing temperatures.
@@ -285,12 +284,12 @@ As expected the SAR dB backscatter values differed between the ascending and des
 
 The Sentinel mission in combination with open source topographic and climate data allows cost efficient bark beetle infestation mapping. A fine sample strategy with well defined class borders and a spatial validation strategy are necessary for machine-learning approaches in the field of bark beetle infestation mapping. The study shows the potential of chlorophyll related vegetation indices calculated from Sentinel-2 L2A images as well as climate and topographic indices as a good predictor variable set. Chlorophyll related vegetation indices are more sensitive to bark beetle infestations than water related indices. In total MSR670, MVI, GLI, NGRDI and NDRE are most important for bark beetle infestation classifications. Less important are CIrededge, DSWI4, ExGR. Irrelevant are the GNDVI, MCARI and the NDVI. Also irrelevant are water related climate and topographic indices. The sampling strategy influences the variable selection enormously. Sentinel-1 SAR data are useful in mountainous areas independently from orbit direction and slope orientation. But Sentinel-1 SAR data is not sensitive enough for mapping bark beetle infestations at different stages. Therefore monthly compositions should be considered as a solution approach for mapping bark beetle infestations in cloudy regions, because optical data are more sensitive to bark beetle infestations than SAR data. The resulting model shows a high potential for mapping bark beetle infestations and also differentiation between early infested trees and healthy trees. The method seems to be promising for detecting bark beetle infestations at early stage and could be useful for a risk assesment. Instead of a classification, a probability calculation could be used to present an acceptable monitoring approach. A risk level could be given based on the probability of infestation. It is recommended to apply this method with more sharp deliniated classes. Machine learning approaches have a great potential for mapping infestations and should be investigated further with different sampling strategies.
 
-\newpage
-
 
 # References
 
 <div id="refs"></div>
+
+\newpage
 
 # Appendix
 

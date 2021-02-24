@@ -20,13 +20,16 @@ autoStopCluster <- function(cl) {
 #Author: Marvin Muesgen
 #Last change: 28.08.2020
 #---
-### function for calculating vegetation indices on sentinel 2 or aerial Images RED GREEN BLUE
-#if you want to calulate only rgb please use the sentinel sensor and put the blue band on band2,
+### function for calculating vegetation indices on sentinel 2 or aerial Images
+#RED GREEN BLUE
+#if you want to calulate only rgb please use the sentinel sensor and put the
+#blue band on band2,
 #green on band3 and red on band4
 
 # also Landsat is possible, please check bandnumber by wavelength
 
-#For using this function you have to make the choice in the "sensor" argument if you want to use:
+#For using this function you have to make the choice in the "sensor" argument
+#if you want to use:
 #"Sentinel2" or "Landsat7"
 #Please put the band arguments correctly, the argument must be a raster:
 

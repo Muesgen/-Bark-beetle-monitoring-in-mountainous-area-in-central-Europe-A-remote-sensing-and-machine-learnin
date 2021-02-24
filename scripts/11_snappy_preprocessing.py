@@ -130,7 +130,8 @@ for folder in os.listdir(path):
        'GeoTIFF')
        del down_tercorrected
    elif modestamp == 'EW' and productstamp == 'GRDM':
-       tercorrected = do_terrain_correction(sentinel_1proc, proj, 0, polarization)
+       tercorrected = do_terrain_correction(sentinel_1proc, proj, 0,
+       polarization)
        subset = do_subset(tercorrected, m.wkt)
        band_db = do_convert_linear_to_db(subset, polarization)
        ratio = do_ratio_VH_VV(band_db)

@@ -176,7 +176,8 @@ cl <- autoStopCluster(parallel::makeCluster(parallel::detectCores()-1))
 
 #create model
 doParallel::registerDoParallel(cl)
-mod1 <- CAST::ffs(predictors = pred, response = resp, method = "rf", importance = TRUE, trControl = trainctl,
+mod1 <- CAST::ffs(predictors = pred, response = resp, method = "rf"
+                  , importance = TRUE, trControl = trainctl,
                   metric = "Accuracy")
 saveRDS(mod1, paste0("E:/Marvin/BB_rf/results/ALL_mod1_3variables_2018.rds"))
 

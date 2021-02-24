@@ -116,7 +116,8 @@ name <- names(rs)
 #creating cloud masks
 #resampling clouds
 for (j in 1:nlayers(rs_clouds)){
-  print(paste(Sys.time(), "Resampling raster", j, "of", nlayers(rs_clouds),"..."))
+  print(paste(Sys.time(), "Resampling raster", j, "of", nlayers(rs_clouds)
+              ,"..."))
   if (j == 1){
     l <-list()
     l[[1]] <- gdal_resample(rs_clouds[[j]],rs_list[[1]], method = "near")
@@ -147,14 +148,16 @@ for (i in 1:nlayers(rs_clouds)){
 
   #masking clouds
   t <- rs_clouds[[i]]
-  t[t == 3 | t == 8 | t == 9 | t == 10] <- NA # define all cloud related pixel values
+  t[t == 3 | t == 8 | t == 9 | t == 10] <- NA # define all cloud
+  #related pixel values
   rs_clouds[[i]] <- t # set all cloud related pixel values to NA
 }
 
 #setting progressbar
 pb = txtProgressBar(min = 0, max = nlayers(rs_clouds), initial = 0, style = 3)
 
-#remove values which are cloud pixels from Rasterstack before calculate statistics
+#remove values which are cloud pixels from Rasterstack before
+#calculate statistics
 for (i in 1:length(cloud_dates)){
 
   #set progressbar
@@ -164,12 +167,15 @@ for (i in 1:length(cloud_dates)){
   #selecting the correct cloud coverage
   tmp_rs <- rs[[which(str_detect(names(rs), cloud_dates[i]) == TRUE)]]
   if(nlayers(tmp_rs) == 0){
-    print(paste0("no layer for date:", cloud_dates[i],"; skipping to next date"))
+    print(paste0("no layer for date:", cloud_dates[i],";
+                 skipping to next date"))
     next # if the clouds do not overlap with vegetation indices skip
   }
 
-  #selecting cloud cover 3= cloud shadows, 8=cloud_Medium_probability, 9=Cloud_high_Probability, 10=Thin_Cirrus
-  tmp_clouds <- rs_clouds[[which(str_detect(names(rs_clouds), cloud_dates[i]) == TRUE)]]
+  #selecting cloud cover 3= cloud shadows, 8=cloud_Medium_probability,
+  #9=Cloud_high_Probability, 10=Thin_Cirrus
+  tmp_clouds <- rs_clouds[[which(str_detect(names(rs_clouds),
+                                            cloud_dates[i]) == TRUE)]]
 
   #remove cloud values
   print(paste0("starting masking for date: ", cloud_dates[i]))
@@ -182,19 +188,24 @@ for (i in 1:length(cloud_dates)){
 }
 
 #write out the cloud correct vegetation indices raster
-terra::writeRaster(ras_masked, paste0(getwd(),"/output/Sen2/rasterVEGIndices_clouds_masked_out.tif"), overwrite=TRUE)
+terra::writeRaster(ras_masked, paste0(getwd(),
+      "/output/Sen2/rasterVEGIndices_clouds_masked_out.tif"), overwrite=TRUE)
 
 ### calculating raster statistics
 pblapply(veg_names, function(x){
-  print(paste0("start calulating raster statistics for whole time period of Index: ",x," ",Sys.time()))
+  print(paste0("start calulating raster statistics for whole time period of
+               Index: ",x," ",Sys.time()))
   rs_stat <- ras_masked[[which(grepl(x,name) == TRUE)]]
   print("mean...")
   beginCluster()
-  rs_mean <- na.exclude(stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = mean))
+  rs_mean <- na.exclude(stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)),
+                                   fun = mean))
   print("min...")
-  rs_min <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = min, na.rm = TRUE)
+  rs_min <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)),
+                       fun = min, na.rm = TRUE)
   print("max...")
-  rs_max <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)), fun = max, na.rm = TRUE)
+  rs_max <- stackApply(rs_stat, indices= rep(1,nlayers(rs_stat)),
+                       fun = max, na.rm = TRUE)
   print("75th quantile..")
   rs_75q <- clusterR(rs_stat,fq75)
   print("25th quantile..")
@@ -204,50 +215,59 @@ pblapply(veg_names, function(x){
   print("median...")
   rs_median <- clusterR(rs_stat,fq50)
   endCluster()
-  print(paste0(" raster statistics are calculated succesfully for whole time period of polarization: ",x," ",Sys.time()))
-  print(paste0("start writing raster statistics for whole time period: ",x," ",Sys.time()))
-  terra::writeRaster(rs_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_75q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_75q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_25q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_25q_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  terra::writeRaster(rs_median, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_median_from",start,"_to_",end,".tif"), overwrite=TRUE)
-  rm(rs_mean,rs_max,rs_min,rs_75q,rs_25q,rs_sd, rs_median)
-  print(paste0("Finish writing raster statistics for whole time period: ",x," ",Sys.time()))
+  print(paste0(" raster statistics are calculated succesfully for
+               whole time period of polarization: ",x," ",Sys.time()))
+  print(paste0("start writing raster statistics for whole time period: ",
+               x," ",Sys.time()))
+  terra::writeRaster(rs_mean, paste0(getwd(),"/output/Sen2/rasterstats/",
+                    x,"_mean_from",start,"_to_",end,".tif"), overwrite=TRUE)
+  terra::writeRaster(rs_max, paste0(getwd(),"/output/Sen2/rasterstats/",
+                    x,"_max_from",start,"_to_",end,".tif"), overwrite=TRUE)
+  terra::writeRaster(rs_min, paste0(getwd(),"/output/Sen2/rasterstats/",
+                    x,"_min_from",start,"_to_",end,".tif"), overwrite=TRUE)
+ terra::writeRaster(rs_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,
+                    "_sd_from",start,"_to_",end,".tif"), overwrite=TRUE)
+ rm(rs_mean,rs_max,rs_min,rs_sd)
+  print(paste0("Finish writing raster statistics for whole time period: ",
+               x," ",Sys.time()))
   pblapply(month, function(y){
     m_dates<- as.character(substr(names(rs_stat), 12, 19))
-    index <- which(m_dates %in% m_dates[grepl(y, m_dates)])# getting the Index of selected rasters in time period
+    index <- which(m_dates %in% m_dates[grepl(y, m_dates)])
+    # getting the Index of selected rasters in time period
     rs_month <- rs_stat[[index]]
-    print(paste0("start calulating raster statistics for month ",y," of vegetation Index: ",x," ",Sys.time()))
+    print(paste0("start calulating raster statistics for month ",
+                 y," of vegetation Index: ",x," ",Sys.time()))
     #rs_stat <- rs_month[[which(grepl(x,names(rs_month)) == TRUE)]]
     beginCluster()
     print("mean...")
-    rsm_mean <- na.exclude(stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = mean))
+    rsm_mean <- na.exclude(stackApply(rs_month,
+                 indices= rep(1,nlayers(rs_month)), fun = mean))
     print("min...")
-    rsm_min <- stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = min, na.rm = TRUE)
+    rsm_min <- stackApply(rs_month,
+                   indices= rep(1,nlayers(rs_month)), fun = min, na.rm = TRUE)
     print("max...")
-    rsm_max <- stackApply(rs_month, indices= rep(1,nlayers(rs_month)), fun = max, na.rm = TRUE)
-    print("75th quantile...")
-    rsm_75q <- clusterR(rs_month,fq75)
-    print("25th quantile...")
-    rsm_25q <- clusterR(rs_month,fq25)
-    print("standard deviaton...")
+    rsm_max <- stackApply(rs_month,
+                  indices= rep(1,nlayers(rs_month)), fun = max, na.rm = TRUE)
     rsm_sd <- clusterR(rs_month,fqsd)
     print("median...")
     rsm_median <- clusterR(rs_month,fq50)
     endCluster()
-    print(paste0("Finished calculating raster statistics for month ",y," of vegetation index: ",x," ",Sys.time()))
-    print(paste0("start writing raster statistic for month: ", x, " ",Sys.time()))
-    terra::writeRaster(rsm_mean, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_mean_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_max, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_max_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_min, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_min_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_75q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_75q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_25q, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_25q_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_sd, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_sd_from ",y,".tif"), overwrite=TRUE)
-    terra::writeRaster(rsm_median, paste0(getwd(),"/output/Sen2/rasterstats/",x,"_median_from ",y,".tif"), overwrite=TRUE)
-    rm(rs_month,rsm_mean,rsm_max,rsm_min,rsm_75q,rsm_25q,rsm_sd, rsm_median)
-    print(paste0(" raster statistics for month ", y,"of Vegetation Index ",x," are written succesfully"))
+    print(paste0("Finished calculating raster statistics for month ",
+                 y," of vegetation index: ",x," ",Sys.time()))
+    print(paste0("start writing raster statistic for month: ", x, " ",
+                 Sys.time()))
+    terra::writeRaster(rsm_mean, paste0(getwd(),"/output/Sen2/rasterstats/",
+                              x,"_mean_from ",y,".tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_max, paste0(getwd(),"/output/Sen2/rasterstats/",
+                              x,"_max_from ",y,".tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_min, paste0(getwd(),"/output/Sen2/rasterstats/",
+                              x,"_min_from ",y,".tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_sd, paste0(getwd(),"/output/Sen2/rasterstats/",
+                                      x,"_sd_from ",y,".tif"), overwrite=TRUE)
+    terra::writeRaster(rsm_median, paste0(getwd(),"/output/Sen2/rasterstats/",
+                                  x,"_median_from ",y,".tif"), overwrite=TRUE)
+print(paste0(" raster statistics for month ", y,"of Vegetation Index ",
+             x," are written succesfully"))
   })
   rm(rs_stat)
 })
