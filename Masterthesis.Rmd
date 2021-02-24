@@ -162,22 +162,17 @@ The model was trained with every possible two-fold variable combination from whi
 knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/predictstack2.png')
 ```
 
+From the Random Forest algorithm a model was created. The Model of scenario 1 predicted on the predictor stack shows two areas (Figure 5). In red are pixels that are classified as infested. In green are pixels that are classified as healthy. 8151 ha are clasified as healthy and 1907 are classified as infested.
+
+The prediction on the stack of the second scenario, where also infestation stages were taken into account is shown in figure 6. 8450 ha in green are classified as healthy, 1271 ha as infested at later stage in red and 336 ha as infested at early stage in yellow
+
+\newpage 
+
 ```{r, fig.align='center', fig.cap='Scenario 2 predicted on the stack. Infested at later stage (red), infested at early stage (yellow), and healthy (green)', out.height="40%", out.width="60%", echo=FALSE}
 knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/predictstack3.png')
 ```
 
-From the Random Forest algorithm a model was created. The Model of scenario 1 predicted on the predictor stack shows two areas (Figure 5). In red are pixels that are classified as infested. In green are pixels that are classified as healthy. 8151 ha are clasified as healthy and 1907 are classified as infested.
-
-
-The prediction on the stack of the second scenario, where also infestation stages were taken into account is shown in figure 6. 8450 ha in green are classified as healthy, 1271 ha as 
-infested at later stage in red and 336 ha as infested at early stage in yellow
-
 ## Forward Feature Selection
-
-```{r, fig.align='center', fig.cap='Variable importance for Scenario 1 (left) and Scenario 2 (right)', out.height="40%", out.width="60%", echo=FALSE}
-knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/ffs.png')
-```
-
 
 From the initial 454 predictor variables the FFS chose eleven variables as relevant for modelling bark beetle infestations for Scenario 1. The other variables were evaluated as unimportant or degrading to the model performance, which means, that potentially the variables led to a misinterpretation or the information is already given in the model. The selected variables are: 
 
@@ -192,6 +187,10 @@ From the initial 454 predictor variables the FFS chose eleven variables as relev
 * VV_asc_means_201805
 * NDRE201804_max
 * MVI2018_05_sd.
+
+```{r, fig.align='center', fig.cap='Variable importance for Scenario 1 (left) and Scenario 2 (right)', out.height="40%", out.width="60%", echo=FALSE}
+knitr::include_graphics('C:/Users/mmues/Desktop/Masterarbeit/Graphics/ffs.png')
+```
 
 Figure 7 shows the predictors and their relative explanatory power for the models. The explanation percentages of the individual predictors were calculated from the model. For scenario 1 MSR670_max over the whole period, GLI_means in September and MVI_max in May are of particulary high importence. It is noticeable that changing climate paramters were also important (direct_insolation over the whole period, sunshine_duration in april and wind_effect in april). It is striking that more optically derived variables were chosen than SAR data. Only the mean of ascending VV in May was part of the model. Also striking is, that most of the monthly paramaters were from the first half of the vegetation period, seven paramters from the first half and two from the second half (Figure 8). July and August were not selected from the Model and two seasonal paramters were chosen. For the second scenario the FFS also selected eleven predictors: (Figure 7):
 
@@ -295,4 +294,79 @@ The Sentinel mission in combination with open source topographic and climate dat
 
 # Appendix
 
+ Script 00 Setup
+
+```{r,eval = FALSE, size = 'tiny', code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/00_setup.R'),}
+```
+
+ Script 01 Create Observation Data Scenario 1
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/001_create_observ_data_x_2018_2c.R')}
+```
+
+ Script 02 Create Observation Data Scenario 2
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/001_create_observ_data_x_2018_3c.R')}
+```
+
+ Script 03 Sentinel 1 Preprocessing
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/11_snappy_preprocessing.py')}
+```
+
+ Script 04 Sentinel 1 Data Extract, Statistic Calculation
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/12_S1_extract_stats.R')}
+```
+
+ Script 05 Sentinel 2 Indices Calculation, Cropping
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/31_S2_indices_calculation_cropping.R')}
+```
+
+ Script 06 Sentinel 2 Data Extract, Statistic Calculation
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/32_S2_data_extract.R')}
+```
+
+ Script 07 Cloud Removal Rasterstats
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/32a_cloud_removal_rasterstats.R')}
+```
+
+ Script 08 Create and Preprocess Climate Data
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/50_climate_data.R')}
+```
+
+ Script 09 Create and Preprocess Topographic Data
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/51_topographic_data.R')}
+```
+
+ Script 10 Create Model Input for Scenario 2 and Scenario 1
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/53_create_param_3c.R')}
+```
+ 
+ Script 11 Create Model Input
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/60_c modelling.R')} 
+``` 
+ 
+ Script 12 Modeling 
+ 
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/60_c modelling.R')}
+```
+
+ Script 13 Plots and Model Evaluation
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/plots.r')}
+```
+
+
+ Script 14 Self Written Functions
+
+```{r,eval = FALSE, code = readLines('C:/Users/mmues/Desktop/Eigene Dateien/Masterarbeit/scripts/functions.R')}
+```
 

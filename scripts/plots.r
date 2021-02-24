@@ -1,3 +1,12 @@
+########## Plots and Model performance ###################
+
+#---
+# title: "Plots"
+# Author: Marvin Müsgen
+# Description: Plots and Evaluation
+#---
+
+
 library(gt)
 library(sf)
 library(ggplot2)
@@ -25,7 +34,7 @@ map <- get_map(c(8.25, 48.6), zoom = 11)
 nationalpark <- ggmap(map)+ggsn::scalebar(x.min = 8.183144, x.max = 8.21817,
                                           y.min = 48.707075, y.max = 48.47491, st.size = 4,
                                           dist = 5, dd2km = TRUE,dist_unit = "km", model = 'WGS84', transform = T) +
-                            geom_polygon(data = np, aes(x = long, y = lat, group = group), alpha = 0.3, fill="red")
+  geom_polygon(data = np, aes(x = long, y = lat, group = group), alpha = 0.3, fill="red")
 
 
 
@@ -192,8 +201,8 @@ for (i in 1:length(rs_list)){
     obs <- df
   }
   else{
-  print(paste0("Finished extracting raster data for observation points: ", Sys.time()))
-  obs <- cbind(obs,df)
+    print(paste0("Finished extracting raster data for observation points: ", Sys.time()))
+    obs <- cbind(obs,df)
   }
 }
 obs<- na.roughfix(obs)
@@ -392,7 +401,7 @@ boxplot_df_3vv <- boxplot_df_3[which(str_detect(boxplot_df_3$Band, "VV")== TRUE)
 boxplot_df_3vv$Band <- gsub("_VV_", "_", boxplot_df_3vv$Band)
 p_df_3vv <- ggplot(boxplot_df_3vv, aes(Band, values)) + geom_boxplot() + theme_grey(base_size = 10) +
   ylab("dB Backscatter") + coord_flip() + ylim(-25, 10) +
- xlab(NULL) + stat_boxplot(geom ="errorbar", width=0.6, colour = "#666666", alpha= 0.7) + ggtitle("South") + theme_bw() + theme(plot.title = element_text(hjust=0.5)) + theme(text = element_text(size=10))
+  xlab(NULL) + stat_boxplot(geom ="errorbar", width=0.6, colour = "#666666", alpha= 0.7) + ggtitle("South") + theme_bw() + theme(plot.title = element_text(hjust=0.5)) + theme(text = element_text(size=10))
 
 p_3 <- ggplot(boxplot_df_3, aes(Band, values)) + geom_boxplot()
 
@@ -457,3 +466,4 @@ dateplot<- ggplot2::ggplot(dates, aes(fill=type, y=Frequency, x=Date)) +
 ggsave('C:/Users/mmues/Desktop/Masterarbeit/Graphics/dates.png', dateplot)
 
 
+##### ENd Plots
