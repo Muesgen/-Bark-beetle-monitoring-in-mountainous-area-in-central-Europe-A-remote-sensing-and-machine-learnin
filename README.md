@@ -1,6 +1,6 @@
 ## Bark-beetle-monitoring-in-mountainous-area-in-central-Europe-A-remote-sensing-and-machine-learning-Approach
 
-This is a private github repository for the master thesis: Bark beetle monitoring in mountainous area in central Europe - A remote sensing and machine learning approach. 
+This is a github repository for the master thesis: Bark beetle monitoring in mountainous area in central Europe - A remote sensing and machine learning approach. 
 
 The repository contains only scripts and functions for the master thesis. 
 
